@@ -67,14 +67,14 @@ namespace cbdc::config {
 
         static constexpr auto log_level = logging::log_level::warn;
     }
-
-    static constexpr auto endpoint_postfix = "endpoint";
-    static constexpr auto loglevel_postfix = "loglevel";
+    static constexpr auto verbose               = "verbose";
+    static constexpr auto endpoint_postfix      = "endpoint";
+    static constexpr auto loglevel_postfix      = "loglevel";
     static constexpr auto raft_endpoint_postfix = "raft_endpoint";
-    static constexpr auto stxo_cache_key = "stxo_cache_depth";
-    static constexpr auto shard_count_key = "shard_count";
-    static constexpr auto shard_prefix = "shard";
-    static constexpr auto seed_privkey = "seed_privkey";
+    static constexpr auto stxo_cache_key        = "stxo_cache_depth";
+    static constexpr auto shard_count_key       = "shard_count";
+    static constexpr auto shard_prefix          = "shard";
+    static constexpr auto seed_privkey          = "seed_privkey";
     static constexpr auto seed_value = "seed_value";
     static constexpr auto seed_from = "seed_from";
     static constexpr auto seed_to = "seed_to";
@@ -213,6 +213,9 @@ namespace cbdc::config {
         bool m_fixed_tx_mode{false};
         /// Flag set if the architecture is two-phase commit.
         bool m_twophase_mode{false};
+        /// List of locking shard verbose flag, set to false by default, 
+        /// ordered by shard ID then node ID. 
+        std::vector<std::vector<bool>> m_verbose;
         /// List of locking shard endpoints, ordered by shard ID then node ID.
         std::vector<std::vector<network::endpoint_t>>
             m_locking_shard_endpoints;
@@ -349,14 +352,23 @@ namespace cbdc::config {
         ///         was not a long or doesn't exist.
         [[nodiscard]] auto get_ulong(const std::string& key) const
             -> std::optional<size_t>;
-
+        /// Return the value for the given key if its value is a bool.
+        /// \param key key to retrieve.
+        /// \return value associated with the key, or false if the value
+        ///         was not given, or set to false. 
+        [[nodiscard]] auto get_bool(const std::string& key) const
+            -> std::optional<bool>;
         /// Return the value for the given key if its value is an endpoint.
         /// \param key key to retrieve.
         /// \return value associated with the key, or std::nullopt if the value
         ///         was not a endpoint or does not exist.
         [[nodiscard]] auto get_endpoint(const std::string& key) const
             -> std::optional<network::endpoint_t>;
-
+        /// Return the value for the given key if verbose flag is given
+        /// \param key key to retrieve.
+        /// \return value associated with the key, false if value not given. 
+        [[nodiscard]] auto get_verbose(const std::string& key) const
+            -> bool;
         /// Return the value for the given key if its value is a loglevel.
         /// \param key key to retrieve.
         /// \return value associated with the key, or std::nullopt if the value

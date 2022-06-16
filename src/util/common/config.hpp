@@ -68,6 +68,7 @@ namespace cbdc::config {
         static constexpr auto log_level = logging::log_level::warn;
     }
     static constexpr auto verbose               = "verbose";
+    static constexpr auto byzantine             = "byzantine";
     static constexpr auto endpoint_postfix      = "endpoint";
     static constexpr auto loglevel_postfix      = "loglevel";
     static constexpr auto raft_endpoint_postfix = "raft_endpoint";
@@ -216,6 +217,9 @@ namespace cbdc::config {
         /// List of locking shard verbose flag, set to false by default, 
         /// ordered by shard ID then node ID. 
         std::vector<std::vector<bool>> m_verbose;
+        /// List of locking shard byzantine flag, set to false by default, 
+        /// ordered by shard ID then node ID. 
+        std::vector<std::vector<bool>> m_byzantine;
         /// List of locking shard endpoints, ordered by shard ID then node ID.
         std::vector<std::vector<network::endpoint_t>>
             m_locking_shard_endpoints;
@@ -367,7 +371,7 @@ namespace cbdc::config {
         /// Return the value for the given key if verbose flag is given
         /// \param key key to retrieve.
         /// \return value associated with the key, false if value not given. 
-        [[nodiscard]] auto get_verbose(const std::string& key) const
+        [[nodiscard]] auto get_flag(const std::string& key) const
             -> bool;
         /// Return the value for the given key if its value is a loglevel.
         /// \param key key to retrieve.

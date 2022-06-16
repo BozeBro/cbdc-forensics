@@ -247,6 +247,13 @@ namespace cbdc::config {
         ss << public_key_postfix;
         return ss.str();
     }
+    auto get_shard_flag_key(const std::string& flag, size_t shard_id, size_t node_id)
+        -> std::string {
+            std::stringstream ss; 
+            get_shard_key_prefix(ss, shard_id);
+            ss << node_id << config_separator << flag; 
+            return ss.str();
+    }
 
     auto read_shard_endpoints(options& opts, const parser& cfg)
         -> std::optional<std::string> {
@@ -256,6 +263,7 @@ namespace cbdc::config {
             opts.m_locking_shard_raft_endpoints.resize(shard_count);
             opts.m_locking_shard_readonly_endpoints.resize(shard_count);
             opts.m_verbose.resize(shard_count); 
+            opts.m_byzantine.resize(shard_count); 
             for(size_t i{0}; i < shard_count; i++) {
                 const auto node_count_key = get_shard_node_count_key(i);
                 const auto node_count = cfg.get_ulong(node_count_key);
@@ -293,19 +301,22 @@ namespace cbdc::config {
                     }
                     opts.m_locking_shard_readonly_endpoints[i].emplace_back(
                         *ro_ep);
-
+                    // Adding custome Byzantine flags underneath. 
                     const auto verb_key 
-                        = get_shard_verbose_key(i, j);
-                    std::cout << verb_key << '\n';
-                    bool verb     = cfg.get_verbose(verb_key);
+                        = get_shard_flag_key(verbose, i, j);
+                    bool verb     = cfg.get_flag(verb_key);
                     opts.m_verbose[i].emplace_back(verb); 
+
+                    const auto byz_key 
+                        = get_shard_flag_key(byzantine, i, j);
+                    bool byz     = cfg.get_flag(byz_key);
+                    opts.m_byzantine[i].emplace_back(byz); 
                 }
             }
         }
 
         return std::nullopt;
     }
-
     auto read_shard_options(options& opts, const parser& cfg)
         -> std::optional<std::string> {
         const auto shard_count = cfg.get_ulong(shard_count_key).value_or(0);
@@ -812,7 +823,7 @@ namespace cbdc::config {
         return parse_ip_port(val_str.value());
     }
 
-    auto parser::get_verbose(const std::string& key) const 
+    auto parser::get_flag(const std::string& key) const 
         -> bool  {
         const auto val_bool = get_string(key);
         if (!val_bool.has_value()) {
@@ -856,7 +867,6 @@ namespace cbdc::config {
         if(it != m_options.end()) {
             return it->second;
         }
-
         return std::nullopt;
     }
 

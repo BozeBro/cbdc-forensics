@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 #include <sstream>
+#include <string>
 
 namespace cbdc::config {
     auto parse_ip_port(const std::string& in_str) -> network::endpoint_t {
@@ -191,7 +192,13 @@ namespace cbdc::config {
            << endpoint_postfix;
         return ss.str();
     }
-
+    auto get_shard_verbose_key(size_t shard_id, size_t node_id) 
+        -> std::string {
+        std::stringstream ss; 
+        get_shard_key_prefix(ss, shard_id); 
+        ss << node_id << config_separator << verbose; 
+        return ss.str(); 
+    }
     void get_coordinator_key_prefix(std::stringstream& ss,
                                     size_t coordinator_id) {
         ss << coordinator_prefix << coordinator_id << config_separator;
@@ -248,6 +255,7 @@ namespace cbdc::config {
             opts.m_locking_shard_endpoints.resize(shard_count);
             opts.m_locking_shard_raft_endpoints.resize(shard_count);
             opts.m_locking_shard_readonly_endpoints.resize(shard_count);
+            opts.m_verbose.resize(shard_count); 
             for(size_t i{0}; i < shard_count; i++) {
                 const auto node_count_key = get_shard_node_count_key(i);
                 const auto node_count = cfg.get_ulong(node_count_key);
@@ -285,6 +293,12 @@ namespace cbdc::config {
                     }
                     opts.m_locking_shard_readonly_endpoints[i].emplace_back(
                         *ro_ep);
+
+                    const auto verb_key 
+                        = get_shard_verbose_key(i, j);
+                    std::cout << verb_key << '\n';
+                    bool verb     = cfg.get_verbose(verb_key);
+                    opts.m_verbose[i].emplace_back(verb); 
                 }
             }
         }
@@ -318,7 +332,7 @@ namespace cbdc::config {
             const auto shard_loglevel = cfg.get_loglevel(shard_loglevel_key)
                                             .value_or(defaults::log_level);
             opts.m_shard_loglevels.push_back(shard_loglevel);
-
+            
             const auto start_key = get_shard_start_key(i);
             const auto range_start = cfg.get_ulong(start_key);
             if(!range_start) {
@@ -355,7 +369,7 @@ namespace cbdc::config {
             opts.m_seed_value
                 = cfg.get_ulong(seed_value).value_or(opts.m_seed_value);
         }
-
+        
         return std::nullopt;
     }
 
@@ -634,7 +648,6 @@ namespace cbdc::config {
         if(err.has_value()) {
             return err.value();
         }
-
         err = read_atomizer_options(opts, cfg);
         if(err.has_value()) {
             return err.value();
@@ -799,6 +812,18 @@ namespace cbdc::config {
         return parse_ip_port(val_str.value());
     }
 
+    auto parser::get_verbose(const std::string& key) const 
+        -> bool  {
+        const auto val_bool = get_string(key);
+        if (!val_bool.has_value()) {
+            std::cout << "false" << '\n';
+            return false; 
+        }
+        std::string flag = val_bool.value();
+        bool isTrue      = flag.compare("true"); 
+        return isTrue;
+    }
+    
     auto parser::get_loglevel(const std::string& key) const
         -> std::optional<logging::log_level> {
         const auto val_str = get_string(key);

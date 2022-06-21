@@ -26,7 +26,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   apt update
   apt install -y build-essential wget cmake libgtest-dev libgmock-dev lcov git software-properties-common
-
+  
   # GitHub Actions in .github/workflows/validation.yml will attempt to cache and reuse leveldb built in this block.
   # If a folder called leveldb-1.22 exists, skip the build step and go straight to install.
   # See https://docs.github.com/en/free-pro-team@latest/actions/guides/caching-dependencies-to-speed-up-workflows
@@ -54,6 +54,7 @@ else
 fi
 
 NURAFT_VERSION="1.3.0"
+<< comment
 if [ ! -d "NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}" ]; then
   echo -e "${green}Building NuRaft from sources...${end}"
   wget https://github.com/eBay/NuRaft/archive/v${NURAFT_VERSION}.tar.gz
@@ -78,6 +79,16 @@ else
   echo -e "${green}Installing NuRaft from cache...${end}"
   cd "NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}/build"
 fi
+comment
+
+cd NuRaft-forensics
+./prepare.sh
+rm -rf build
+mkdir -p build
+cd build
+
+eval "cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DDISABLE_SSL=1 .."
+eval "make -j$CPUS static_lib"
 
 cp libnuraft.a /usr/local/lib
 cp -r ../include/libnuraft /usr/local/include

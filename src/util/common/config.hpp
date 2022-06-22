@@ -149,7 +149,6 @@ namespace cbdc::config {
         /// endpoint.
         size_t m_shard_completed_txs_cache_size{
             defaults::shard_completed_txs_cache_size};
-
         /// List of atomizer endpoints, ordered by atomizer ID.
         std::vector<network::endpoint_t> m_atomizer_endpoints;
         /// List of archiver endpoints, ordered by archiver ID.

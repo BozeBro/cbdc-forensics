@@ -1,8 +1,8 @@
-Changed configure.sh such that we do not have to grep the old file. 
-We will always be building our NuRaft project instead of caching 
-(for now)
-TODO: add back the cache, similar to the old configure.sh so not many new changes are added to the coniguration file. 
-Making the raft_params obtain the flags from the configuration file. 
+### Changes
+I will be removing changes that no longer exist 
+
+
+-- Making the raft_params obtain the flags from the configuration file. 
 `./src/uhs/twophase/locking_shard/controller.cpp`
 
 ```cpp
@@ -12,7 +12,7 @@ params.verbose  = m_opts.m_verbose;
 params.is_byzantine = m_opts.m_byzantine; 
 ```
 
-Added verbose and byzantine flags to the default struct
+-- Added verbose and byzantine flags to the default struct
 Also added array of nodes with verbose and byzantine flags.
 `./src/util/common/config.hpp`
 ```cpp
@@ -27,7 +27,7 @@ std::vector<std::vector<bool>> m_verbose;
 std::vector<std::vector<bool>> m_byzantine;
 ```
 
-Loading the verbose and byzantine flags in `./src/util/common/config.cpp`. We edit the `read_shard_endpoints` function since it contains the shard id and the node id of each raft node in a shard. It also edits the code very little. The functionality of the code is not changed from the original. 
+-- Loading the verbose and byzantine flags in `./src/util/common/config.cpp`. We edit the `read_shard_endpoints` function since it contains the shard id and the node id of each raft node in a shard. It also edits the code very little. The functionality of the code is not changed from the original. 
 New additions to the function
 ```cpp 
     opts.m_verbose.resize(shard_count); 
@@ -45,3 +45,7 @@ New additions to the function
     bool byz     = cfg.get_flag(byz_key);
     opts.m_byzantine[i].emplace_back(byz); 
 ```
+
+-- We preinstall the NuRaft library installing NuRaft at runtime. The Dockerfile and scripts/configure.sh are changed to reflect this fact. 
+
+

@@ -31,7 +31,6 @@ limitations under the License.
 #include "srv_role.hxx"
 #include "srv_state.hxx"
 #include "timer_task.hxx"
-
 #include <list>
 #include <map>
 #include <string>

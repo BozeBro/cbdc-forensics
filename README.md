@@ -3,10 +3,8 @@ The goal is to implement a forensic protocol ontop of the raft implementation. T
 
 ## Get the code
 ```terminal
-git clone https://github.com/BozeBro/cbdc-forensics
+git clone --recurse-submodules https://github.com/BozeBro/cbdc-forensics
 cd cbdc-forensics
-git clone https://github.com/BozeBro/NuRaft-forensics
-cd ..
 ```
 ## How to edit the number and configure raft shards
 We will look specifically at configuring the number of 2pc raft shard nodes in the 2pc network. Editing other roles and in different architectures follow a similar procedure.

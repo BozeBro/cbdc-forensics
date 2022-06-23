@@ -52,7 +52,10 @@ else
   ln -s -f $(which clang-format-13) /usr/local/bin/clang-format
   ln -s -f $(which clang-tidy-13) /usr/local/bin/clang-tidy
 fi
-
+<<comment
+We already have NURAFT installed in cbdc version.
+TODO: Separate packages so its like they are separate.
+RATIONALE: Putting them together makes it simpler for me for developing
 NURAFT_VERSION="1.3.0"
 if [ ! -d "NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}" ]; then
   echo -e "${green}Building NuRaft from sources...${end}"
@@ -78,7 +81,7 @@ else
   echo -e "${green}Installing NuRaft from cache...${end}"
   cd "NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}/build"
 fi
-
+comment
 cp libnuraft.a /usr/local/lib
 cp -r ../include/libnuraft /usr/local/include
 

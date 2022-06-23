@@ -16,7 +16,7 @@ RUN apt update && \
       git
 
 # Args
-ARG CMAKE_BUILD_TYPE="Release"
+ARG CMAKE_BUILD_TYPE="Debug"
 ARG LEVELDB_VERSION="1.22"
 ARG NURAFT_VERSION="1.3.0"
 
@@ -29,24 +29,25 @@ RUN wget https://github.com/google/leveldb/archive/${LEVELDB_VERSION}.tar.gz && 
     make -j$(nproc) && \
     make install
 
-# Install NuRaft
-RUN wget https://github.com/eBay/NuRaft/archive/v${NURAFT_VERSION}.tar.gz && \
-    tar xzvf v${NURAFT_VERSION}.tar.gz && \
-    rm v${NURAFT_VERSION}.tar.gz && \
-    cd "NuRaft-${NURAFT_VERSION}" && \
+# Set working directory
+WORKDIR /opt/tx-processor
+
+# Copy source
+COPY . .
+
+# Use the raft that is already installed
+RUN cd "./NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}" && \
+    # wget https://github.com/eBay/NuRaft/archive/v${NURAFT_VERSION}.tar.gz && \
+    #tar xzvf v${NURAFT_VERSION}.tar.gz && \
+    # rm v${NURAFT_VERSION}.tar.gz && \
     ./prepare.sh && \
+    rm -rf build && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DDISABLE_SSL=1 .. && \
     make -j$(nproc) static_lib && \
     cp libnuraft.a /usr/local/lib && \
     cp -r ../include/libnuraft /usr/local/include
-
-# Set working directory
-WORKDIR /opt/tx-processor
-
-# Copy source
-COPY . .
 
 # Update submodules and run configure.sh
 RUN git submodule init && git submodule update

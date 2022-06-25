@@ -321,7 +321,9 @@ public:
      */
     int32 get_id() const
     { return id_; }
-
+    
+    bool  get_verbose() const 
+    { return verbose; }
     /**
      * Get the current term of this server.
      *
@@ -824,7 +826,20 @@ protected:
 
 protected:
     static const int default_snapshot_sync_block_size;
-
+    bool verbose; 
+    /**
+     * The type of role that the raft node represents
+     * E.g. Coordinator, raft shard node, 
+     */
+    const std::string machine_type;
+    /**
+     * The index of a raft node in a particular cluster.
+     */
+    int32 node_id;
+    /**
+     * If a raft, shard node, the index of the shard
+     */
+    int32 shard_id; 
     /**
      * Current limit values.
      */

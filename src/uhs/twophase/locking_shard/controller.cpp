@@ -58,7 +58,11 @@ namespace cbdc::locking_shard {
         params.heart_beat_interval_ = static_cast<int>(m_opts.m_heartbeat);
         params.snapshot_distance_ = 0; // TODO: implement snapshots
         params.max_append_size_ = static_cast<int>(m_opts.m_raft_max_batch);
-
+        params.node_id  = static_cast<int>(m_node_id);
+        params.shard_id = static_cast<int>(m_shard_id);
+        params.verbose  = m_opts.m_verbose[m_shard_id][m_node_id];
+        params.is_byzantine = m_opts.m_byzantine[m_shard_id][m_node_id];  
+        params.machine_type = "shard";     
         if(!m_raft_serv->init(params)) {
             m_logger->error("Failed to initialize raft server");
             return false;

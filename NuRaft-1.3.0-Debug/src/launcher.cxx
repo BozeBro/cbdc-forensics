@@ -49,7 +49,11 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
                                 rpc_cli_factory,
                                 scheduler,
                                 params_given );
-    raft_instance_ = cs_new<raft_server>(ctx, opt);
+    if (params_given.verbose) {
+        raft_instance_ = cs_new<verbose_server>(ctx, opt, true);
+    } else {
+        raft_instance_ = cs_new<raft_server>(ctx, opt);
+    }
     asio_listener_->listen( raft_instance_ );
     return raft_instance_;
 }

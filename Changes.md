@@ -47,5 +47,50 @@ New additions to the function
 ```
 
 -- We preinstall the NuRaft library installing NuRaft at runtime. The Dockerfile and scripts/configure.sh are changed to reflect this fact. 
+In `Nuraft-1.3.0-Debug/include/libnuraft/raft_params.hxx` and `Nuraft-1.3.0-Debug/include/libnuraft/raft_server.hxx`
 
+```cpp
+/**
+ * If True, outputs more debugger messages.
+ */
+bool verbose; 
+/**
+ * If True, uses the byzantine class.
+ */
+bool is_byzantine;
+/**
+ * The type of role that the raft node represents
+ * E.g. Coordinator, raft shard node, 
+ */
+const std::string machine_type;
+/**
+ * The index of a raft node in a particular cluster.
+ */
+int32 node_id;
+/**
+ * If a raft, shard node, the index of the shard
+ */
+int32 shard_id; 
+```
 
+Add `verbose_server.hxx` implementation in `nuraft.hxx`
+Add `verbose_server.cxx` to source files in `CMakeLists.txt`
+
+Have launcher.cxx case on whether verbose output or not.
+```cpp
+if (params_given.verbose) {
+        raft_instance_ = cs_new<verbose_server>(ctx, opt, true);
+    } else {
+        raft_instance_ = cs_new<raft_server>(ctx, opt);
+    }
+```
+
+In `controller.cpp` for the raft shard,
+include details about node id, shard id, verbose flag, byzantine flag and machine type (shard)
+```cpp
+params.node_id  = static_cast<int>(m_node_id);
+params.shard_id = static_cast<int>(m_shard_id);
+params.verbose  = m_opts.m_verbose[m_shard_id][m_node_id];
+params.is_byzantine = m_opts.m_byzantine[m_shard_id][m_node_id];  
+params.machine_type = "shard";     
+```

@@ -340,6 +340,27 @@ struct raft_params {
 
 public:
     /**
+     * If True, outputs more debugger messages.
+     */
+    bool verbose; 
+    /**
+     * If True, uses the byzantine class.
+     */
+    bool is_byzantine;
+    /**
+     * The type of role that the raft node represents
+     * E.g. Coordinator, raft shard node, 
+     */
+    std::string machine_type;
+    /**
+     * The index of a raft node in a particular cluster.
+     */
+    int32 node_id;
+    /**
+     * If a raft, shard node, the index of the shard
+     */
+    int32 shard_id; 
+    /**
      * Upper bound of election timer, in millisecond.
      */
     int32 election_timeout_upper_bound_;

@@ -69,6 +69,7 @@ namespace cbdc::coordinator {
         // Initialize NuRaft with the state machine we just created. Register
         // our callback function to notify us when we become a leader or
         // follower.
+        m_raft_params.machine_type = "coordinator";
         if(!m_raft_serv.init(m_raft_params)) {
             return false;
         }

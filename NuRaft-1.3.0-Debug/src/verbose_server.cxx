@@ -13,7 +13,8 @@ namespace nuraft {
          ss << "shard id:" << shard_id << "\n";
       }
       ss << "node id: " << node_id << "\n";
-      p_in(ss.str().c_str());
+      std::string print_msg = ss.str();
+      p_in("%s", print_msg.c_str());
    }
    void verbose_server::print_msg(std::string ss) {
       if (!debug) return;

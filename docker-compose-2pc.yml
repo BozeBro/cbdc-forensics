@@ -11,8 +11,8 @@ services:
     ports:
       - 5555:5555
     depends_on:
-      - "coordinator0"
-      - "shard0"
+      - "coordinator00"
+      - "shard00"
     networks:
       - 2pc-network
     healthcheck:
@@ -21,15 +21,15 @@ services:
       timeout: 10s
       retries: 5
 
-  coordinator0:
+  coordinator00:
     build: .
     image: opencbdc-tx
     tty: true
     command: ./build/src/uhs/twophase/coordinator/coordinatord 2pc-compose.cfg 0 0
-    expose:
+    expose: 
       - "7777"
     depends_on:
-      - "shard0"
+      - "shard00"
     networks:
       - 2pc-network
     healthcheck:
@@ -39,7 +39,7 @@ services:
       retries: 5
     restart: always
 
-  shard0:
+  shard00:
     build: .
     image: opencbdc-tx
     tty: true
@@ -52,6 +52,40 @@ services:
       - 2pc-network
     healthcheck:
       test: ["CMD-SHELL", "netstat -ltn | grep -c 6666"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  shard01:
+    build: .
+    image: opencbdc-tx
+    tty: true
+    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 1
+    expose:
+      - "2222"
+    ports:
+      - 2727:2727
+    networks:
+      - 2pc-network
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -ltn | grep -c 2222"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  shard02:
+    build: .
+    image: opencbdc-tx
+    tty: true
+    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 2
+    expose:
+      - "3333"
+    ports:
+      - 3737:3737
+    networks:
+      - 2pc-network
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -ltn | grep -c 3333"]
       interval: 30s
       timeout: 10s
       retries: 5

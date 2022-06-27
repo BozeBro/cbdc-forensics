@@ -254,7 +254,13 @@ namespace cbdc::config {
             ss << node_id << config_separator << flag; 
             return ss.str();
     }
-
+    auto get_coordinator_flag_key(const std::string& flag, size_t shard_id, size_t node_id)
+        -> std::string {
+            std::stringstream ss; 
+            get_coordinator_key_prefix(ss, shard_id);
+            ss << node_id << config_separator << flag; 
+            return ss.str();
+    }
     auto read_shard_endpoints(options& opts, const parser& cfg)
         -> std::optional<std::string> {
         const auto shard_count = cfg.get_ulong(shard_count_key).value_or(0);
@@ -390,6 +396,8 @@ namespace cbdc::config {
             = cfg.get_ulong(coordinator_count_key).value_or(0);
         opts.m_coordinator_endpoints.resize(coordinator_count);
         opts.m_coordinator_raft_endpoints.resize(coordinator_count);
+        opts.m_verbose.resize(coordinator_count);
+        opts.m_byzantine.resize(coordinator_count); 
         for(size_t i{0}; i < coordinator_count; i++) {
             const auto loglevel_key = get_coordinator_loglevel_key(i);
             const auto coordinator_loglevel
@@ -421,8 +429,18 @@ namespace cbdc::config {
                          + " (" + ep_key + ")";
                 }
                 opts.m_coordinator_endpoints[i].emplace_back(*ep);
+                // Adding custome Byzantine flags underneath. 
+                const auto verb_key 
+                    = get_coordinator_flag_key(verbose, i, j);
+                bool verb     = cfg.get_flag(verb_key);
+                opts.m_verbose[i].emplace_back(verb); 
+
+                const auto byz_key 
+                    = get_coordinator_flag_key(byzantine, i, j);
+                bool byz     = cfg.get_flag(byz_key);
+                opts.m_byzantine[i].emplace_back(byz); 
+                }
             }
-        }
 
         opts.m_coordinator_max_threads
             = cfg.get_ulong(coordinator_max_threads)
@@ -827,11 +845,11 @@ namespace cbdc::config {
         -> bool  {
         const auto val_bool = get_string(key);
         if (!val_bool.has_value()) {
-            std::cout << "false" << '\n';
+            std::cout << "NO VAL " << key << "\n";
             return false; 
         }
         std::string flag = val_bool.value();
-        bool isTrue      = flag.compare("true"); 
+        bool isTrue      = flag == "true"; 
         return isTrue;
     }
     

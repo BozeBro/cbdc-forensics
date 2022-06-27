@@ -16,7 +16,7 @@ limitations under the License.
 **************************************************************************/
 
 #include "launcher.hxx"
-
+#include <iostream>
 // LCOV_EXCL_START
 
 namespace nuraft {
@@ -49,10 +49,12 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
                                 rpc_cli_factory,
                                 scheduler,
                                 params_given );
-    if (params_given.verbose) {
-        raft_instance_ = cs_new<verbose_server>(ctx, opt, true);
+    
+    bool is_verbose = params_given.verbose; 
+    if (params_given.is_byzantine) {
+        raft_instance_ = cs_new<byz_server>(ctx, opt, is_verbose); 
     } else {
-        raft_instance_ = cs_new<raft_server>(ctx, opt);
+        raft_instance_ = cs_new<verbose_server>(ctx, opt, is_verbose); 
     }
     asio_listener_->listen( raft_instance_ );
     return raft_instance_;

@@ -66,7 +66,11 @@ struct raft_params {
     };
 
     raft_params()
-        : election_timeout_upper_bound_(500)
+        : 
+        verbose(false)
+        , is_byzantine(false)
+        , machine_type("")
+        , election_timeout_upper_bound_(500)
         , election_timeout_lower_bound_(250)
         , heart_beat_interval_(125)
         , rpc_failure_backoff_(50)

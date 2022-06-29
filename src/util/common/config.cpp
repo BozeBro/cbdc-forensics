@@ -845,7 +845,6 @@ namespace cbdc::config {
         -> bool  {
         const auto val_bool = get_string(key);
         if (!val_bool.has_value()) {
-            std::cout << "NO VAL " << key << "\n";
             return false; 
         }
         std::string flag = val_bool.value();

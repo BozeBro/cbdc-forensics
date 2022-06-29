@@ -218,6 +218,7 @@ set(RAFT_CORE
     ${ROOT_SRC}/asio_service.cxx
     ${ROOT_SRC}/buffer.cxx
     ${ROOT_SRC}/buffer_serializer.cxx
+    ${ROOT_SRC}/byzantine_server.cxx
     ${ROOT_SRC}/cluster_config.cxx
     ${ROOT_SRC}/crc32.cxx
     ${ROOT_SRC}/error_code.cxx
@@ -235,11 +236,11 @@ set(RAFT_CORE
     ${ROOT_SRC}/launcher.cxx
     ${ROOT_SRC}/peer.cxx
     ${ROOT_SRC}/raft_server.cxx
-    ${ROOT_SRC}/verbose_server.cxx
     ${ROOT_SRC}/snapshot.cxx
     ${ROOT_SRC}/snapshot_sync_req.cxx
     ${ROOT_SRC}/srv_config.cxx
     ${ROOT_SRC}/stat_mgr.cxx
+    ${ROOT_SRC}/verbose_server.cxx
     )
 add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})
 

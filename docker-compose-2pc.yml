@@ -13,6 +13,8 @@ services:
     depends_on:
       - "coordinator00"
       - "shard00"
+      - "shard01"
+      - "shard02"
     networks:
       - 2pc-network
     healthcheck:
@@ -30,6 +32,8 @@ services:
       - "7777"
     depends_on:
       - "shard00"
+      - "shard01"
+      - "shard02"
     networks:
       - 2pc-network
     healthcheck:

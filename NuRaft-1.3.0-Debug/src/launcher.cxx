@@ -51,11 +51,10 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
                                 params_given );
     
     bool is_verbose = params_given.verbose; 
-    if (params_given.is_byzantine) {
-        raft_instance_ = cs_new<byz_server>(ctx, opt, is_verbose); 
-    } else {
-        raft_instance_ = cs_new<verbose_server>(ctx, opt, is_verbose); 
-    }
+    std::string byz_type = params_given.is_byzantine;
+    if (byz_type == "dol") raft_instance_ = cs_new<byz_server>(ctx, opt, is_verbose); 
+    else if (byz_type == "crash") raft_instance_ = cs_new<byz_server>(ctx, opt, is_verbose);
+    else raft_instance_ = cs_new<verbose_server>(ctx, opt, is_verbose); 
     asio_listener_->listen( raft_instance_ );
     return raft_instance_;
 }

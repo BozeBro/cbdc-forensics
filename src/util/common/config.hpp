@@ -219,7 +219,7 @@ namespace cbdc::config {
         std::vector<std::vector<bool>> m_verbose;
         /// List of locking shard byzantine flag, set to false by default, 
         /// ordered by shard ID then node ID. 
-        std::vector<std::vector<bool>> m_byzantine;
+        std::vector<std::vector<std::string>> m_byzantine;
         /// List of locking shard endpoints, ordered by shard ID then node ID.
         std::vector<std::vector<network::endpoint_t>>
             m_locking_shard_endpoints;
@@ -372,7 +372,7 @@ namespace cbdc::config {
         /// \param key key to retrieve.
         /// \return value associated with the key, false if value not given. 
         [[nodiscard]] auto get_flag(const std::string& key) const
-            -> bool;
+            -> std::string;
         /// Return the value for the given key if its value is a loglevel.
         /// \param key key to retrieve.
         /// \return value associated with the key, or std::nullopt if the value

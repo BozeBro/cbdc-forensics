@@ -68,7 +68,7 @@ struct raft_params {
     raft_params()
         : 
         verbose(false)
-        , is_byzantine(false)
+        , is_byzantine("")
         , machine_type("")
         , election_timeout_upper_bound_(500)
         , election_timeout_lower_bound_(250)
@@ -350,7 +350,7 @@ public:
     /**
      * If True, uses the byzantine class.
      */
-    bool is_byzantine;
+    std::string is_byzantine;
     /**
      * The type of role that the raft node represents
      * E.g. Coordinator, raft shard node, 
@@ -363,7 +363,7 @@ public:
     /**
      * If a raft, shard node, the index of the shard
      */
-    int32 shard_id; 
+    int32 cluster_id; 
     /**
      * Upper bound of election timer, in millisecond.
      */

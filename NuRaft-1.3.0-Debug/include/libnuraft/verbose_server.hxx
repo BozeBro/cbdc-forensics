@@ -431,9 +431,9 @@ class verbose_server : public raft_server {
          * Set a custom callback function for increasing term.
          */
         void set_inc_term_func(srv_state::inc_term_func func);
-    private:
-        void printer();
+    protected:
         bool debug; 
+        void printer();
         void print_msg(std::string ss); 
 }; 
 }

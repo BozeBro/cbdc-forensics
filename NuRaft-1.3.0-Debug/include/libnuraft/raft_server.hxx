@@ -839,7 +839,7 @@ protected:
     /**
      * If a raft, shard node, the index of the shard
      */
-    int32 shard_id; 
+    int32 cluster_id; 
     /**
      * Current limit values.
      */

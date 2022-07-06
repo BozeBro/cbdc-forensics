@@ -310,12 +310,11 @@ namespace cbdc::config {
                     // Adding custome Byzantine flags underneath. 
                     const auto verb_key 
                         = get_shard_flag_key(verbose, i, j);
-                    bool verb     = cfg.get_flag(verb_key);
                     opts.m_verbose[i].emplace_back(verb); 
 
                     const auto byz_key 
                         = get_shard_flag_key(byzantine, i, j);
-                    bool byz     = cfg.get_flag(byz_key);
+                    std::string byz     = cfg.get_flag(byz_key);
                     opts.m_byzantine[i].emplace_back(byz); 
                 }
             }
@@ -432,12 +431,12 @@ namespace cbdc::config {
                 // Adding custome Byzantine flags underneath. 
                 const auto verb_key 
                     = get_coordinator_flag_key(verbose, i, j);
-                bool verb     = cfg.get_flag(verb_key);
+                bool verb     = cfg.get_flag(verb_key) == "true";
                 opts.m_verbose[i].emplace_back(verb); 
 
                 const auto byz_key 
                     = get_coordinator_flag_key(byzantine, i, j);
-                bool byz     = cfg.get_flag(byz_key);
+                std::string byz     = cfg.get_flag(byz_key);
                 opts.m_byzantine[i].emplace_back(byz); 
                 }
             }
@@ -842,14 +841,13 @@ namespace cbdc::config {
     }
 
     auto parser::get_flag(const std::string& key) const 
-        -> bool  {
+        -> std::string  {
         const auto val_bool = get_string(key);
         if (!val_bool.has_value()) {
-            return false; 
+            return ""; 
         }
         std::string flag = val_bool.value();
-        bool isTrue      = flag == "true"; 
-        return isTrue;
+        return flag;
     }
     
     auto parser::get_loglevel(const std::string& key) const

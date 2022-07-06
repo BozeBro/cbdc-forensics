@@ -9,9 +9,7 @@ namespace nuraft {
       if (!debug) return; 
       std::stringstream ss; 
       ss << "machine type: " << machine_type << "\n";
-      if (shard_id >= 0) {
-         ss << "shard id:" << shard_id << "\n";
-      }
+         ss << "cluster id:" << cluster_id << "\n";
       ss << "node id: " << node_id << "\n";
       std::string print_msg = ss.str();
       p_in("%s", print_msg.c_str());

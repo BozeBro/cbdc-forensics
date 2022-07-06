@@ -14,12 +14,5 @@ namespace nuraft {
             void request_vote(bool force_vote);
             void handle_vote_resp(resp_msg& resp);
     };
-    class crash_server : public verbose_server {
-        using verbose_server::verbose_server;
-        public:
-            virtual ptr<resp_msg> process_req(req_msg& req);
-        protected:
-            void handle_election_timeout();
-    };
 }
 #endif // _BYZANTINE_SERVER_HXX_

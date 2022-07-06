@@ -346,5 +346,9 @@ ptr<resp_msg> crash_server::process_req(req_msg& req) {
     for ( ; ;) {}
     // We will never arrive here
     return verbose_server::process_req(req);
+
+}
+void crash_server::handle_election_timeout() {
+    restart_election_timer();
 }
 }

@@ -268,6 +268,8 @@ namespace cbdc::config {
             opts.m_locking_shard_endpoints.resize(shard_count);
             opts.m_locking_shard_raft_endpoints.resize(shard_count);
             opts.m_locking_shard_readonly_endpoints.resize(shard_count);
+            opts.m_verbose.resize(shard_count); 
+            opts.m_byzantine.resize(shard_count); 
             for(size_t i{0}; i < shard_count; i++) {
                 const auto node_count_key = get_shard_node_count_key(i);
                 const auto node_count = cfg.get_ulong(node_count_key);
@@ -654,18 +656,12 @@ namespace cbdc::config {
             = cfg.get_ulong(loadgen_count_key).value_or(opts.m_loadgen_count);
     }
 
-    auto read_options(const std::string& config_file, const std::string& machine_type)
+    auto read_options(const std::string& config_file)
         -> std::variant<options, std::string> {
         auto opts = options{};
         auto cfg = parser(config_file);
 
         opts.m_twophase_mode = cfg.get_ulong(two_phase_mode).value_or(0) != 0;
-        if (machine_type == "shard") {
-            opts.m_byzantine = get_shard_flag_key(verbose, shar)
-        }
-        else if (machine_type == "coordinator") {
-
-        }
         auto err = read_sentinel_options(opts, cfg);
         if(err.has_value()) {
             return err.value();
@@ -707,9 +703,9 @@ namespace cbdc::config {
         return opts;
     }
 
-    auto load_options(const std::string& config_file, const std::string& machine_type)
+    auto load_options(const std::string& config_file)
         -> std::variant<options, std::string> {
-        auto opt = read_options(config_file, machine_type);
+        auto opt = read_options(config_file);
         if(std::holds_alternative<options>(opt)) {
             auto res = check_options(std::get<options>(opt));
             if(res) {

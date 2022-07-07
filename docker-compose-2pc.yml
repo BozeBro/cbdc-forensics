@@ -43,23 +43,23 @@ services:
       retries: 5
     restart: always
 
-#  coordinator01:
-#    build: .
-#    image: opencbdc-tx
-#    tty: true
-#    command: ./build/src/uhs/twophase/coordinator/coordinatord 2pc-compose.cfg 0 1
-#    expose:
-#      - "2222"
-#    depends_on:
-#      - "shard00"
-#    networks:
-#      - 2pc-network
-#    healthcheck:
-#      test: ["CMD-SHELL", "netstat -ltn | grep -c 2222"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 5
-#    restart: always
+  coordinator01:
+    build: .
+    image: opencbdc-tx
+    tty: true
+    command: ./build/src/uhs/twophase/coordinator/coordinatord 2pc-compose.cfg 0 1
+    expose:
+      - "2222"
+    depends_on:
+      - "shard00"
+    networks:
+      - 2pc-network
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -ltn | grep -c 2222"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
 
 #  coordinator02:
 #    build: .

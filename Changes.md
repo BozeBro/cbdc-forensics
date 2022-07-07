@@ -99,3 +99,30 @@ params.is_byzantine = m_opts.m_byzantine;
 params.machine_type = "shard";   
 ```
 its "coordinator" when referencing the coordinator node
+
+The byzantine node (DDoS) contains three fundamental changes to note. 
+1. For every request it receives from the leader, it will first process the request, and then initiate a vote. 
+```cpp
+    if (peers_.size() >= 4) initiate_vote();
+    return resp;
+```
+In the future, I'll add a variable that maintains what the total size should be.
+2. When notified that it has sent too many prevote requests, it will ignore reconnection.
+```cpp
+void byz_server::handle_prevote_resp(resp_msg& resp) {
+...
+if (pre_vote_.live_ >= election_quorum_size) {
+        // pre_vote_.quorum_reject_count_.fetch_add(1);
+        p_wn("[PRE-VOTE] rejected by quorum, count %zu",
+             pre_vote_.quorum_reject_count_.load());
+        if ( pre_vote_.quorum_reject_count_ >=
+                 raft_server::raft_limits_.pre_vote_rejection_limit_ ) {
+            // p_ft("too many pre-vote rejections, probably this node is not "
+            //     "receiving heartbeat from leader. "
+            //     "we should re-establish the network connection");
+            //raft_server::send_reconnect_request();
+        }
+... 
+}
+```
+3. When it has been declared the leader, it will ignore the leader election and start the election again.

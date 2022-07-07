@@ -339,8 +339,8 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
         election_completed_ = true;
         //become_leader();
         p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION\n");
-        request_prevote();
-        //initiate_vote();
+        // request_prevote();
+        initiate_vote();
         //restart_election_timer();
         // p_in("  === LEADER (term %zu) ===\n", state_->get_term());
     }

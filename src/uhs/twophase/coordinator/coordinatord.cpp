@@ -24,11 +24,15 @@ auto main(int argc, char** argv) -> int {
                   << std::get<std::string>(cfg_or_err) << std::endl;
         return -1;
     }
-    auto opts = std::get<cbdc::config::options>(cfg_or_err);
 
     auto coordinator_id = std::stoull(args[2]);
     auto node_id = std::stoull(args[3]);
-
+    std::string machine = "coordinator";
+    auto flag_opts = cbdc::config::load_flags(machine, coordinator_id, node_id, args[1]);
+    auto flags = std::get<cbdc::config::options>(flag_opts);
+    auto opts = std::get<cbdc::config::options>(cfg_or_err);
+    opts.m_verbose = flags.m_verbose;
+    opts.m_byzantine = flags.m_byzantine;
     if(opts.m_coordinator_endpoints.size() <= coordinator_id) {
         std::cerr << "Coordinator ID not configured" << std::endl;
         return -1;

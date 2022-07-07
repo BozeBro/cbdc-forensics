@@ -67,7 +67,8 @@ struct raft_params {
 
     raft_params()
         : 
-        verbose(false)
+        peer_size(-1)
+        , verbose(false)
         , is_byzantine("")
         , machine_type("")
         , election_timeout_upper_bound_(500)
@@ -343,6 +344,7 @@ struct raft_params {
     }
 
 public:
+    int32 peer_size; 
     /**
      * If True, outputs more debugger messages.
      */

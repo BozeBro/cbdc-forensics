@@ -1,11 +1,18 @@
 ## Introduction:
 The goal is to implement a forensic protocol ontop of the raft implementation. The cbdc created by MIT will server as a case study to show that performance is not inhibited by this forensic protocol built on top.
 
-## Get the code
+## Get the code && run the code
 ```terminal
 git clone --recurse-submodules https://github.com/BozeBro/cbdc-forensics
 cd cbdc-forensics
+git checkout Byzantine
+docker compose –file docker-compose-2pc.yml up –build
 ```
+To run wallet commands, open another terminal window and run
+```terminal
+docker run --network 2pc-network -ti ghcr.io/mit-dci/opencbdc-tx /bin/bash
+```
+See oldREADME.md for a runthrough of wallet commands
 ## How to edit the number and configure raft shards
 We will look specifically at configuring the number of 2pc raft shard nodes in the 2pc network. Editing other roles and in different architectures follow a similar procedure.
 
@@ -82,9 +89,9 @@ Since the original cbdc paper had `raft_endpoint = endpoint + 1`, we follow the 
 We can now add verbose and a byzantine flag to the current sytem to 2pc raft shards. 
 To get more debug information from raft nodes, run the debug flag, and to customize the nodes to be byzantine, use the byzantine flag.
 
-TODO: byzantine flag implementation 
 
-Continuing on our previous `2pc-compose.fg`, this is configuration for a normal node and a verbose node.
+Continuing on our previous `2pc-compose.fg`, this is configuration for a normal node and a Byzantine verbose node.
+dol stands for (DOL)
 
 ```cpp
 2pc=1
@@ -101,6 +108,7 @@ shard0_1_endpoint="shard1:7777"
 shard0_1_raft_endpoint="shard1:7778"
 shard0_1_readonly_endpoint="shard1:1000"
 shard0_1_verbose="true"
+shard0_1_byzantine="dol
 ```
 verbose and byzantine flags are set to false by default. 
 

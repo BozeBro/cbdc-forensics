@@ -110,7 +110,8 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    request_prevote();
+    // p_in("THE PEER SIZE IS %d", peers_.size());
+    if (peers_.size() >= 4) initiate_vote();
     return resp;
 }
 void byz_server::handle_prevote_resp(resp_msg& resp) {
@@ -171,15 +172,15 @@ void byz_server::handle_prevote_resp(resp_msg& resp) {
     }
 
     if (pre_vote_.live_ >= election_quorum_size) {
-        pre_vote_.quorum_reject_count_.fetch_add(1);
+        // pre_vote_.quorum_reject_count_.fetch_add(1);
         p_wn("[PRE-VOTE] rejected by quorum, count %zu",
              pre_vote_.quorum_reject_count_.load());
         if ( pre_vote_.quorum_reject_count_ >=
                  raft_server::raft_limits_.pre_vote_rejection_limit_ ) {
-            p_ft("too many pre-vote rejections, probably this node is not "
-                 "receiving heartbeat from leader. "
-                 "we should re-establish the network connection");
-            raft_server::send_reconnect_request();
+            // p_ft("too many pre-vote rejections, probably this node is not "
+            //     "receiving heartbeat from leader. "
+            //     "we should re-establish the network connection");
+            //raft_server::send_reconnect_request();
         }
     }
 
@@ -336,19 +337,13 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
     if (votes_granted_ >= election_quorum_size) {
         p_in("Server is elected as leader for term %zu", state_->get_term());
         election_completed_ = true;
-        // become_leader();
+        //become_leader();
+        p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION\n");
+        request_prevote();
+        //initiate_vote();
+        //restart_election_timer();
         // p_in("  === LEADER (term %zu) ===\n", state_->get_term());
-        p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION");
     }
 }
 
-ptr<resp_msg> crash_server::process_req(req_msg& req) {
-    for ( ; ;) {}
-    // We will never arrive here
-    return verbose_server::process_req(req);
-
-}
-void crash_server::handle_election_timeout() {
-    restart_election_timer();
-}
 }

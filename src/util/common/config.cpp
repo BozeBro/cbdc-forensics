@@ -268,8 +268,6 @@ namespace cbdc::config {
             opts.m_locking_shard_endpoints.resize(shard_count);
             opts.m_locking_shard_raft_endpoints.resize(shard_count);
             opts.m_locking_shard_readonly_endpoints.resize(shard_count);
-            opts.m_verbose.resize(shard_count); 
-            opts.m_byzantine.resize(shard_count); 
             for(size_t i{0}; i < shard_count; i++) {
                 const auto node_count_key = get_shard_node_count_key(i);
                 const auto node_count = cfg.get_ulong(node_count_key);
@@ -307,16 +305,6 @@ namespace cbdc::config {
                     }
                     opts.m_locking_shard_readonly_endpoints[i].emplace_back(
                         *ro_ep);
-                    // Adding custome Byzantine flags underneath. 
-                    const auto verb_key 
-                        = get_shard_flag_key(verbose, i, j);
-                    bool verb     = cfg.get_flag(verb_key) == "true";
-                    opts.m_verbose[i].emplace_back(verb); 
-
-                    const auto byz_key 
-                        = get_shard_flag_key(byzantine, i, j);
-                    std::string byz     = cfg.get_flag(byz_key);
-                    opts.m_byzantine[i].emplace_back(byz); 
                 }
             }
         }
@@ -396,8 +384,6 @@ namespace cbdc::config {
             = cfg.get_ulong(coordinator_count_key).value_or(0);
         opts.m_coordinator_endpoints.resize(coordinator_count);
         opts.m_coordinator_raft_endpoints.resize(coordinator_count);
-        opts.m_verbose.resize(coordinator_count);
-        opts.m_byzantine.resize(coordinator_count); 
         for(size_t i{0}; i < coordinator_count; i++) {
             const auto loglevel_key = get_coordinator_loglevel_key(i);
             const auto coordinator_loglevel
@@ -429,16 +415,6 @@ namespace cbdc::config {
                          + " (" + ep_key + ")";
                 }
                 opts.m_coordinator_endpoints[i].emplace_back(*ep);
-                // Adding custome Byzantine flags underneath. 
-                const auto verb_key 
-                    = get_coordinator_flag_key(verbose, i, j);
-                bool verb     = cfg.get_flag(verb_key) == "true";
-                opts.m_verbose[i].emplace_back(verb); 
-
-                const auto byz_key 
-                    = get_coordinator_flag_key(byzantine, i, j);
-                std::string byz     = cfg.get_flag(byz_key);
-                opts.m_byzantine[i].emplace_back(byz); 
                 }
             }
 
@@ -702,7 +678,24 @@ namespace cbdc::config {
 
         return opts;
     }
-
+    auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 
+        -> std::variant<options, std::string>{
+        bool verb;
+        std::string byz;
+        auto opts = options{};
+        auto cfg = parser(config_file);
+        if (machine == "shard") {
+            verb = cfg.get_flag(get_shard_flag_key(verbose, cluster_id, node_id)) == "true";
+            byz = cfg.get_flag(get_shard_flag_key(byzantine, cluster_id, node_id));
+        }
+        else if (machine == "coordinator") {
+            verb = cfg.get_flag(get_coordinator_flag_key(verbose, cluster_id, node_id)) == "true";
+            byz = cfg.get_flag(get_coordinator_flag_key(byzantine, cluster_id, node_id));
+        }
+        opts.m_byzantine = byz;
+        opts.m_verbose = verb;
+        return opts; 
+    }
     auto load_options(const std::string& config_file)
         -> std::variant<options, std::string> {
         auto opt = read_options(config_file);

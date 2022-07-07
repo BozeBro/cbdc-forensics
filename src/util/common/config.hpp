@@ -216,10 +216,10 @@ namespace cbdc::config {
         bool m_twophase_mode{false};
         /// List of locking shard verbose flag, set to false by default, 
         /// ordered by shard ID then node ID. 
-        std::vector<std::vector<bool>> m_verbose;
+        bool m_verbose;
         /// List of locking shard byzantine flag, set to false by default, 
         /// ordered by shard ID then node ID. 
-        std::vector<std::vector<std::string>> m_byzantine;
+        std::string m_byzantine;
         /// List of locking shard endpoints, ordered by shard ID then node ID.
         std::vector<std::vector<network::endpoint_t>>
             m_locking_shard_endpoints;
@@ -280,7 +280,10 @@ namespace cbdc::config {
     ///         message on failure.
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string>;
-
+    // CBDC: Function to obtain the byzantine flags. 
+    // Currently just byzantine and verbose
+    auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 
+        -> std::variant<options, std::string>;
     /// Loads options from the given config file and check for invariants.
     /// \param config_file the path to the config file from which load options.
     /// \return valid options struct, or string with error message on failure.

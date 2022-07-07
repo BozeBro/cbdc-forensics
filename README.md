@@ -91,7 +91,7 @@ To get more debug information from raft nodes, run the debug flag, and to custom
 
 
 Continuing on our previous `2pc-compose.fg`, this is configuration for a normal node and a Byzantine verbose node.
-dol stands for (DOL)
+dol stands for (Denial of Leadership)
 
 ```cpp
 2pc=1
@@ -108,7 +108,7 @@ shard0_1_endpoint="shard1:7777"
 shard0_1_raft_endpoint="shard1:7778"
 shard0_1_readonly_endpoint="shard1:1000"
 shard0_1_verbose="true"
-shard0_1_byzantine="dol
+shard0_1_byzantine="dol"
 ```
 verbose and byzantine flags are set to false by default. 
 

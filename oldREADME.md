@@ -45,12 +45,6 @@ If you would like to join our technical discussions and help workshop proposals,
 
 For more information on how to contribute, please see our [Contribution Guide](docs/contributing.md)!
 
-# Get the Code
-
-1. [Install Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-1. Clone the repository (including submodules)
-    - `git clone --recurse-submodules https://github.com/mit-dci/opencbdc-tx`
-
 # Run the Code
 
 The easiest way to compile the code and run the system locally is using [Docker](https://www.docker.com).

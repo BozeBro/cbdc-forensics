@@ -1,7 +1,16 @@
-## Introduction:
-The goal is to implement a forensic protocol ontop of the raft implementation. The cbdc created by MIT will server as a case study to show that performance is not inhibited by this forensic protocol built on top.
+## Table of Contents
+  - Current New Flags
+  - Run the Code
+  - Configuring nodes
 
-## Get the code && run the code
+### Flags 
+1. verbose - "true" or "false"
+  - "false" by default
+  - shard0_0_verbose="true"
+2. byzantine - "vm" or "normal"
+  - "normal" by default
+  - shard1_0_byzantine="vm"
+### Get the code && run the code
 ```terminal
 git clone --recurse-submodules https://github.com/BozeBro/cbdc-forensics
 cd cbdc-forensics
@@ -12,105 +21,66 @@ To run wallet commands, open another terminal window and run
 ```terminal
 docker run --network 2pc-network -ti ghcr.io/mit-dci/opencbdc-tx /bin/bash
 ```
-See oldREADME.md for a runthrough of wallet commands
-## How to edit the number and configure raft shards
-We will look specifically at configuring the number of 2pc raft shard nodes in the 2pc network. Editing other roles and in different architectures follow a similar procedure.
+See oldREADME.md for wallet commands
+### Configuring nodes
+To edit configure shard nodes in 2pc architecture, we must edit `docker-compose-2pc.yml` and `2pc-compose.cfg`
+Here is an example `2pc-compose.cfg` will relevant shard information. 
+```cpp
+shard_count=1
+shard0_start=0
+shard0_end=255
+shard0_count=4
 
-In file, `2pc-compose.cfg`, specify the count via shard_count. Raft shards are numbered from [0, shard_count).
+shard0_loglevel="INFO"
 
-shardi_count specifies the shard where index i `0 <= i < shard_count`.
+shard0_0_endpoint="shard00:6666"
+shard0_0_raft_endpoint="shard00:6667"
+shard0_0_readonly_endpoint="shard00:6767"
 
-For each instance of a raft node, we must define a configuration in the `docker-compose-2pc.yml` file. 
+shard0_1_endpoint="shard01:6777"
+shard0_1_raft_endpoint="shard01:6668"
+shard0_1_readonly_endpoint="shard01:7777"
 
+shard0_2_endpoint="shard02:6888"
+shard0_2_raft_endpoint="shard02:6889"
+shard0_2_readonly_endpoint="shard02:8787"
+shard0_2_byzantine="vm"
 
-### We'll look specifically at the raft node.
-
-shardi_j specifies the node and its shard. i is the shard id and j is the node id. 
-For shardi_j, each must be specified an endpoint, raft_endpoint, and readonly_endpoint. 
-
-An example specification appears as the following, 
+shard0_3_endpoint="shard03:7888"
+shard0_3_raft_endpoint="shard03:7889"
+shard0_3_readonly_endpoint="shard03:1111"
+```
+In the file, we have 1 shard, and that shard has 5 replicated nodes. 
+The yml file makes sure that 5 services are started for shards.
+Here is a configuration for shard 0, node 2.
 ```yml
-shard0:
+shard02:
     build: .
     image: opencbdc-tx
     tty: true
-    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 0
+    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 2
     expose:
-      - "6666"
+      - "6888"
     ports:
-      - 6767:6767
+      - 8787:8787
     networks:
       - 2pc-network
     healthcheck:
-      test: ["CMD-SHELL", "netstat -ltn | grep -c 6666"]
+      test: ["CMD-SHELL", "netstat -ltn | grep -c 6888"]
       interval: 30s
       timeout: 10s
       retries: 5
 ```
-You can copy this configuration to create as many instances as you like. Make sure to change the name shard0 to a different name.
-the value after expose represents the endpoint in the .cfg file, and ports represent the read_only port. Follow the same format as the example where the number before and after the colon is the same. 
-The first argument to the executable in the command arguement is the shard id and the second argument is the node id.
-An example second shard could look like this
+
+Always start each argument to `shard0_2_x` with "shard02:"
+
+
+The argument to expose has same number as `shard0_2_endpoint`
+
+The ports has the same number as `shard0_2_readonly_endpoint`
+
+In the command arguement in the yml file, 
 ```yml
-shard1:
-    build: .
-    image: opencbdc-tx
-    tty: true
-    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 1
-    expose:
-      - "7777"
-    ports:
-      - 1000:1000
-    networks:
-      - 2pc-network
-    healthcheck:
-      test: ["CMD-SHELL", "netstat -ltn | grep -c 7777"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 2
 ```
-Let's suppose we have 1 shard with 2 raft nodes. This is what the corresponding raft nodes would look like in `2pc-compose.cfg` 
-```cpp
-2pc=1
-shard_count=1
-shard0_start=0
-shard0_end=255
-shard0_count=2
-shard0_loglevel="INFO"
-shard0_0_endpoint="shard0:6666"
-shard0_0_raft_endpoint="shard0:6667"
-shard0_0_readonly_endpoint="shard0:6767"
-shard0_1_endpoint="shard1:7777"
-shard0_1_raft_endpoint="shard1:7778"
-shard0_1_readonly_endpoint="shard1:1000"
-```
-Since the original cbdc paper had `raft_endpoint = endpoint + 1`, we follow the same practice.
-## New addtions
-We can now add verbose and a byzantine flag to the current sytem to 2pc raft shards. 
-To get more debug information from raft nodes, run the debug flag, and to customize the nodes to be byzantine, use the byzantine flag.
-
-
-Continuing on our previous `2pc-compose.fg`, this is configuration for a normal node and a Byzantine verbose node.
-dol stands for (DOL)
-
-```cpp
-2pc=1
-shard_count=1
-shard0_start=0
-shard0_end=255
-shard0_count=2
-shard0_loglevel="INFO"
-shard0_0_endpoint="shard0:6666"
-shard0_0_raft_endpoint="shard0:6667"
-shard0_0_readonly_endpoint="shard0:6767"
-shard0_0_verbose="false"
-shard0_1_endpoint="shard1:7777"
-shard0_1_raft_endpoint="shard1:7778"
-shard0_1_readonly_endpoint="shard1:1000"
-shard0_1_verbose="true"
-shard0_1_byzantine="dol
-```
-verbose and byzantine flags are set to false by default. 
-
-## Running the system and testing Wallet commands
-See oldREADME.md. Ignore section that says Get the code.
+The third argument designates the shard number, and the fourth argument is the node id.

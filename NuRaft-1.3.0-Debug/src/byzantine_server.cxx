@@ -18,7 +18,7 @@
 namespace nuraft {
 byz_server::byz_server(context* ctx, const init_options& opt, bool verbose) 
             : verbose_server::verbose_server(ctx, opt, verbose)
-            {p_in("I AM BYZANTINE!");}
+            {}
 ptr<resp_msg> byz_server::process_req(req_msg& req) {
     print_msg("Trying to manipulate votes");
     cb_func::Param param(id_, leader_);
@@ -111,7 +111,19 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_next_idx() );
     }
     // p_in("THE PEER SIZE IS %d", peers_.size());
-    if (peers_.size() >= 4) initiate_vote();
+    // We make sure the request is from a leader
+    bool valid = req.get_type() != msg_type::request_vote_request && \
+        req.get_type() != msg_type::pre_vote_request;
+    // p_in("THE current size, peer_size, and valid is %d %d %d",peers_.size(), peer_size, valid);
+    // peers_.size() >= peer_size - 1 && valid
+    p_in("%d", peers_.size());
+    if (peers_.size() >= peer_size - 1) {
+        initiate_vote();
+        }
+    else if (is_leader()) {
+        become_follower();
+        initiate_vote();
+    }
     return resp;
 }
 void byz_server::handle_prevote_resp(resp_msg& resp) {

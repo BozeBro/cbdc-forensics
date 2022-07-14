@@ -67,7 +67,7 @@ struct raft_params {
 
     raft_params()
         : 
-        peer_size(-1)
+        peer_size(0)
         , verbose(false)
         , is_byzantine("")
         , machine_type("")
@@ -344,7 +344,7 @@ struct raft_params {
     }
 
 public:
-    int32 peer_size; 
+    size_t peer_size; 
     /**
      * If True, outputs more debugger messages.
      */

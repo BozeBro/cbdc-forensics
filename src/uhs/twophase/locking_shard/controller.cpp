@@ -63,6 +63,7 @@ namespace cbdc::locking_shard {
         params.verbose = m_opts.m_verbose;
         params.is_byzantine = m_opts.m_byzantine;  
         params.machine_type = "shard";
+        params.peer_size    = static_cast<size_t>(m_opts.m_size); 
         if(!m_raft_serv->init(params)) {
             m_logger->error("Failed to initialize raft server");
             return false;

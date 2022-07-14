@@ -40,9 +40,11 @@ auto main(int argc, char** argv) -> int {
     // CBDC: Adding flags
     std::string machine = "shard";
     auto flag_opts = cbdc::config::load_flags(machine, shard_id, node_id, args[1]);
+    size_t  cluster_number = cbdc::config::load_number(machine, shard_id, args[1]);
     auto flags = std::get<cbdc::config::options>(flag_opts);
     cfg.m_verbose = flags.m_verbose;
     cfg.m_byzantine = flags.m_byzantine;
+    cfg.m_size =  cluster_number; 
     auto logger = std::make_shared<cbdc::logging::log>(
         cfg.m_shard_loglevels[shard_id]);
 

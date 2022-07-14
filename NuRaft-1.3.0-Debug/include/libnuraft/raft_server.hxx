@@ -826,6 +826,15 @@ protected:
 
 protected:
     static const int default_snapshot_sync_block_size;
+    /**
+     * Informs the node the expected size of a cluster.
+     * 
+     */
+    size_t peer_size;
+    /**
+     * Flag to provide more log output.
+     * 
+     */
     bool verbose; 
     /**
      * The type of role that the raft node represents

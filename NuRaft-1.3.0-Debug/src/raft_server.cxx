@@ -45,7 +45,8 @@ const int raft_server::default_snapshot_sync_block_size = 4 * 1024;
 raft_server::limits raft_server::raft_limits_;
 
 raft_server::raft_server(context* ctx, const init_options& opt)
-    : bg_append_ea_(nullptr)
+    : machine_type(ctx->params_->machine_type)
+    , bg_append_ea_(nullptr)
     , initialized_(false)
     , leader_(-1)
     , id_(ctx->state_mgr_->server_id())
@@ -123,8 +124,10 @@ raft_server::raft_server(context* ctx, const init_options& opt)
         state_->set_voted_for(-1);
     }
     vote_init_timer_term_ = state_->get_term();
-
     print_msg.clear();
+    peer_size = params->peer_size;
+    node_id = params->node_id;
+    cluster_id = params->cluster_id;
 
     ptr<cluster_config> c_conf = get_config();
     std::stringstream ss;

@@ -214,11 +214,11 @@ namespace cbdc::config {
         bool m_fixed_tx_mode{false};
         /// Flag set if the architecture is two-phase commit.
         bool m_twophase_mode{false};
-        /// List of locking shard verbose flag, set to false by default, 
-        /// ordered by shard ID then node ID. 
+        // Size of the cluster of the raft node. 
+        size_t m_size; 
+        // Verbose flag of a raft node. False by default
         bool m_verbose;
-        /// List of locking shard byzantine flag, set to false by default, 
-        /// ordered by shard ID then node ID. 
+        // Byzantine flag of a raft node. False by default
         std::string m_byzantine;
         /// List of locking shard endpoints, ordered by shard ID then node ID.
         std::vector<std::vector<network::endpoint_t>>
@@ -280,6 +280,8 @@ namespace cbdc::config {
     ///         message on failure.
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string>;
+    /// Get the number of nodes in a cluster.
+    size_t load_number(std::string& machine, size_t cluster_id, std::string& config_file);
     // CBDC: Function to obtain the byzantine flags. 
     // Currently just byzantine and verbose
     auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 

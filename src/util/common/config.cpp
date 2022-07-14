@@ -631,7 +631,28 @@ namespace cbdc::config {
         opts.m_loadgen_count
             = cfg.get_ulong(loadgen_count_key).value_or(opts.m_loadgen_count);
     }
-
+    // WE assume that load_number works as expected since it will be after the original 
+    // implementation that checks for valid input
+    size_t load_number(std::string& machine, size_t cluster_id, std::string& config_file) {
+        auto cfg = parser(config_file);
+        if (machine == "shard") {
+            const auto node_count_key = get_shard_node_count_key(cluster_id);
+            const auto node_count = cfg.get_ulong(node_count_key);
+            if (!node_count) {
+                std::cout << "NUMBER NOT HERE\n";
+                return 0;
+            }
+            std::cout << "THE NODE COUNT IS " << (*node_count) << '\n';
+            return *node_count; 
+        }
+        else if (machine == "coordinator") {
+            const auto coordinator_count
+            = cfg.get_ulong(coordinator_count_key).value_or(0);
+            return coordinator_count; 
+        }
+        // No other machine type should be implemented right now. 
+        return 0; 
+    }
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string> {
         auto opts = options{};

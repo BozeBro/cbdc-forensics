@@ -2,6 +2,7 @@
   - Current New Flags
   - Run the Code
   - Configuring nodes
+  - Crash Nodes
 
 ### Flags 
 1. verbose - "true" or "false"
@@ -84,3 +85,31 @@ In the command arguement in the yml file,
 command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 2
 ```
 The third argument designates the shard number, and the fourth argument is the node id.
+
+### Crash Nodes
+When running the system, one can see the raft nodes via
+```terminal
+docker ps
+```
+For example
+```terminal
+CONTAINER ID   IMAGE         COMMAND                  CREATED        STATUS                    PORTS                              NAMES
+fa92a21f413f   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (healthy)     0.0.0.0:5555->5555/tcp             cbdc-forensics-sentinel0-1
+fd44bd8b5416   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (healthy)     1111/tcp                           cbdc-forensics-coordinator00-1
+b1edaf7f9d8d   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (unhealthy)   2222/tcp                           cbdc-forensics-coordinator01-1
+b504401986ba   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (unhealthy)   6666/tcp, 0.0.0.0:6767->6767/tcp   cbdc-forensics-shard00-1
+b867de05a151   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (healthy)     6888/tcp, 0.0.0.0:8787->8787/tcp   cbdc-forensics-shard02-1
+3d222c9577c9   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (unhealthy)   0.0.0.0:1111->1111/tcp, 7888/tcp   cbdc-forensics-shard03-1
+bffce768658a   opencbdc-tx   "./build/src/uhs/two…"   27 hours ago   Up 27 hours (unhealthy)   6777/tcp, 0.0.0.0:7777->7777/tcp   cbdc-forensics-shard01-1
+```
+
+To crash a node, use the command
+```terminal
+docker stop NAME
+```
+where NAME is one the names listed under NAMES.
+
+```terminal
+docker stop cbdc-forensics-shard03-1
+```
+would stop the shard 0, node 3.

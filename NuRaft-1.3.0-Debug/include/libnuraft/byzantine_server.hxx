@@ -13,6 +13,7 @@ namespace nuraft {
             void initiate_vote(bool force_vote = false);
             void request_vote(bool force_vote);
             void handle_vote_resp(resp_msg& resp);
+            void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
     };
 }
 #endif // _BYZANTINE_SERVER_HXX_

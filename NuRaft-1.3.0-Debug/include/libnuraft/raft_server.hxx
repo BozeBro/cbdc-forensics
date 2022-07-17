@@ -728,7 +728,7 @@ protected:
     void request_vote(bool force_vote);
     void request_append_entries();
     bool request_append_entries(ptr<peer> p);
-    void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
+    virtual void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
     void handle_append_entries_resp(resp_msg& resp);
     void handle_install_snapshot_resp(resp_msg& resp);
     void handle_install_snapshot_resp_new_member(resp_msg& resp);

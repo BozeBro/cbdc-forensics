@@ -112,17 +112,13 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
     }
     // p_in("THE PEER SIZE IS %d", peers_.size());
     // We make sure the request is from a leader
-    bool valid = req.get_type() != msg_type::request_vote_request && \
-        req.get_type() != msg_type::pre_vote_request;
+    //bool valid = req.get_type() != msg_type::request_vote_request && \
+    //    req.get_type() != msg_type::pre_vote_request;
     // p_in("THE current size, peer_size, and valid is %d %d %d",peers_.size(), peer_size, valid);
     // peers_.size() >= peer_size - 1 && valid
-    p_in("%d", peers_.size());
     if (peers_.size() >= peer_size - 1) {
-        initiate_vote();
-        }
-    else if (is_leader()) {
-        become_follower();
-        initiate_vote();
+        p_in("INITIATING VOTE");
+        byz_server::initiate_vote();
     }
     return resp;
 }
@@ -236,6 +232,7 @@ void byz_server::initiate_vote(bool force_vote) {
          force_vote ||
          check_cond_for_zp_election() ||
          get_quorum_for_election() == 0 ) {
+            p_in("REQUESTING VOTE NOW. CBDC");
         // Request vote when
         //  1) my priority satisfies the target, OR
         //  2) I'm the only node in the group.
@@ -246,7 +243,7 @@ void byz_server::initiate_vote(bool force_vote) {
         votes_responded_ = 0;
         election_completed_ = false;
         ctx_->state_mgr_->save_state(*state_);
-        request_vote(force_vote);
+        byz_server::request_vote(force_vote);
     }
 
     if (role_ != srv_role::leader) {
@@ -269,10 +266,12 @@ void byz_server::request_vote(bool force_vote) {
 
     // is this the only server?
     if (votes_granted_ > get_quorum_for_election()) {
-        std::cout << "REJECT LEADER\n";
         election_completed_ = true;
-        // Ignore votes. We want to perpetually continue election
-        // become_leader();
+        {
+            become_leader();
+            become_follower();
+            initiate_vote();
+        }
         return;
     }
 
@@ -313,48 +312,112 @@ void byz_server::request_vote(bool force_vote) {
         }
     }
 }
-void byz_server::handle_vote_resp(resp_msg& resp) {
-    if (election_completed_) {
-        p_in("Election completed, will ignore the voting result from this server");
+
+void byz_server::handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err) {
+    p_in("HANDLING PEER RESPONSE NOW");
+    recur_lock(lock_);
+    if (err) {
+        int32 peer_id = err->req()->get_dst();
+        ptr<peer> pp = nullptr;
+        auto entry = peers_.find(peer_id);
+        if (entry != peers_.end()) pp = entry->second;
+
+        int rpc_errs = 0;
+        if (pp) {
+            pp->inc_rpc_errs();
+            rpc_errs = pp->get_rpc_errs();
+
+            check_snapshot_timeout(pp);
+        }
+
+        if (rpc_errs < raft_server::raft_limits_.warning_limit_) {
+            p_wn("peer (%d) response error: %s", peer_id, err->what());
+        } else if (rpc_errs == raft_server::raft_limits_.warning_limit_) {
+            p_wn("too verbose RPC error on peer (%d), "
+                 "will suppress it from now", peer_id);
+        }
+
+        if (pp && pp->is_leave_flag_set()) {
+            // If this is to-be-removed server, proceed it without
+            // waiting for the response.
+            handle_join_leave_rpc_err(msg_type::leave_cluster_request, pp);
+        }
         return;
     }
 
-    if (resp.get_term() != state_->get_term()) {
-        // Vote response for other term. Should ignore it.
-        p_in("[VOTE RESP] from peer %d, my role %s, "
-             "but different resp term %zu. ignore it.",
-             resp.get_src(), srv_role_to_string(role_).c_str(), resp.get_term());
+    if (!resp.get()) {
+        p_wn("empty peer response");
         return;
     }
-    votes_responded_ += 1;
 
-    if (resp.get_accepted()) {
-        votes_granted_ += 1;
+    p_db( "Receive a %s message from peer %d with "
+          "Result=%d, Term=%llu, NextIndex=%llu",
+          msg_type_to_string(resp->get_type()).c_str(),
+          resp->get_src(),
+          resp->get_accepted() ? 1 : 0,
+          resp->get_term(),
+          resp->get_next_idx() );
+
+    p_tr("src: %d, dst: %d, resp->get_term(): %d\n",
+         (int)resp->get_src(), (int)resp->get_dst(), (int)resp->get_term());
+
+    if (resp->get_accepted()) {
+        // On accepted response, reset response timer.
+        auto entry = peers_.find(resp->get_src());
+        if (entry != peers_.end()) {
+            peer* pp = entry->second.get();
+            int rpc_errs = pp->get_rpc_errs();
+            if (rpc_errs >= raft_server::raft_limits_.warning_limit_) {
+                p_wn("recovered from RPC failure from peer %d, %d errors",
+                     resp->get_src(), rpc_errs);
+            }
+            pp->reset_rpc_errs();
+            pp->reset_resp_timer();
+        }
     }
 
-    if (votes_responded_ >= get_num_voting_members()) {
-        election_completed_ = true;
+    if ( is_valid_msg(resp->get_type()) ) {
+        bool update_term_succ = update_term(resp->get_term());
+
+        // if term is updated, no more action is required
+        if (update_term_succ) return;
     }
 
-    int32 election_quorum_size = get_quorum_for_election() + 1;
+    // ignore the response that with lower term for safety
+    switch (resp->get_type())
+    {
+    case msg_type::pre_vote_response:
+        handle_prevote_resp(*resp);
+        break;
 
-    p_in("[VOTE RESP] peer %d (%s), resp term %zu, my role %s, "
-         "granted %d, responded %d, "
-         "num voting members %d, quorum %d\n",
-         resp.get_src(), (resp.get_accepted()) ? "O" : "X", resp.get_term(),
-         srv_role_to_string(role_).c_str(),
-         (int)votes_granted_, (int)votes_responded_,
-         get_num_voting_members(), election_quorum_size);
+    case msg_type::request_vote_response:
+        handle_vote_resp(*resp);
+        break;
 
-    if (votes_granted_ >= election_quorum_size) {
-        p_in("Server is elected as leader for term %zu", state_->get_term());
-        election_completed_ = true;
-        //become_leader();
-        p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION\n");
-        // request_prevote();
-        initiate_vote();
-        //restart_election_timer();
-        // p_in("  === LEADER (term %zu) ===\n", state_->get_term());
+    case msg_type::append_entries_response:
+        handle_append_entries_resp(*resp);
+        break;
+
+    case msg_type::install_snapshot_response:
+        handle_install_snapshot_resp(*resp);
+        break;
+
+    case msg_type::priority_change_response:
+        handle_priority_change_resp(*resp);
+        break;
+
+    case msg_type::ping_response:
+        p_in("got ping response from %d", resp->get_src());
+        break;
+
+    case msg_type::custom_notification_response:
+        handle_custom_notification_resp(*resp);
+        break;
+
+    default:
+        p_er( "received an unexpected response: %s, ignore it",
+              msg_type_to_string(resp->get_type()).c_str() );
+        break;
     }
 }
 

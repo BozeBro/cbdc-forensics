@@ -19,6 +19,7 @@ limitations under the License.
 **************************************************************************/
 
 #include "raft_server.hxx"
+#include "byzantine_server.hxx"
 
 #include "cluster_config.hxx"
 #include "event_awaiter.h"
@@ -336,6 +337,53 @@ ptr<resp_msg> raft_server::handle_vote_req(req_msg& req) {
     }
 
     return resp;
+}
+void byz_server::handle_vote_resp(resp_msg& resp) {
+    p_in("HANDLING VOTE RESPONSE NOW!");
+    if (election_completed_) {
+        p_in("Election completed, will ignore the voting result from this server");
+        return;
+    }
+
+    if (resp.get_term() != state_->get_term()) {
+        // Vote response for other term. Should ignore it.
+        p_in("[VOTE RESP] from peer %d, my role %s, "
+             "but different resp term %zu. ignore it.",
+             resp.get_src(), srv_role_to_string(role_).c_str(), resp.get_term());
+        return;
+    }
+    votes_responded_ += 1;
+
+    if (resp.get_accepted()) {
+        votes_granted_ += 1;
+    }
+
+    if (votes_responded_ >= get_num_voting_members()) {
+        election_completed_ = true;
+    }
+
+    int32 election_quorum_size = get_quorum_for_election() + 1;
+
+    p_in("[VOTE RESP] peer %d (%s), resp term %zu, my role %s, "
+         "granted %d, responded %d, "
+         "num voting members %d, quorum %d\n",
+         resp.get_src(), (resp.get_accepted()) ? "O" : "X", resp.get_term(),
+         srv_role_to_string(role_).c_str(),
+         (int)votes_granted_, (int)votes_responded_,
+         get_num_voting_members(), election_quorum_size);
+
+    if (votes_granted_ >= election_quorum_size) {
+        p_in("Server is elected as leader for term %zu", state_->get_term());
+        election_completed_ = true;
+        //become_leader();
+        p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION\n");
+        // request_prevote();
+        become_follower();
+        become_follower();
+        initiate_vote();
+        //restart_election_timer();
+        // p_in("  === LEADER (term %zu) ===\n", state_->get_term());
+    }
 }
 
 void raft_server::handle_vote_resp(resp_msg& resp) {

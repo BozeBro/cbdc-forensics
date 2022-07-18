@@ -20,7 +20,6 @@ byz_server::byz_server(context* ctx, const init_options& opt, bool verbose)
             : verbose_server::verbose_server(ctx, opt, verbose)
             {}
 ptr<resp_msg> byz_server::process_req(req_msg& req) {
-    print_msg("Trying to manipulate votes");
     cb_func::Param param(id_, leader_);
     param.ctx = &req;
     CbReturnCode rc = ctx_->cb_func_.call(cb_func::ProcessReq, &param);
@@ -95,7 +94,6 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
 
     } else if (req.get_type() == msg_type::priority_change_request) {
         resp = handle_priority_change_req(req);
-
     } else {
         // extended requests
         resp = handle_ext_msg(req);
@@ -110,8 +108,7 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    if (peers_.size() >= peer_size - 1) {
-        p_in("INITIATING VOTE");
+    if (peers_.size() >= peer_size - 1 && get_leader() == req.get_src()) {
         byz_server::initiate_vote();
     }
     return resp;
@@ -174,15 +171,15 @@ void byz_server::handle_prevote_resp(resp_msg& resp) {
     }
 
     if (pre_vote_.live_ >= election_quorum_size) {
-        // pre_vote_.quorum_reject_count_.fetch_add(1);
+        pre_vote_.quorum_reject_count_.fetch_add(1);
         p_wn("[PRE-VOTE] rejected by quorum, count %zu",
              pre_vote_.quorum_reject_count_.load());
         if ( pre_vote_.quorum_reject_count_ >=
                  raft_server::raft_limits_.pre_vote_rejection_limit_ ) {
-            // p_ft("too many pre-vote rejections, probably this node is not "
-            //     "receiving heartbeat from leader. "
-            //     "we should re-establish the network connection");
-            //raft_server::send_reconnect_request();
+            p_ft("too many pre-vote rejections, probably this node is not "
+                 "receiving heartbeat from leader. "
+                 "we should re-establish the network connection");
+            raft_server::send_reconnect_request();
         }
     }
 
@@ -262,8 +259,6 @@ void byz_server::request_vote(bool force_vote) {
     if (votes_granted_ > get_quorum_for_election()) {
         election_completed_ = true;
         {
-            become_leader();
-            become_follower();
             initiate_vote();
         }
         return;

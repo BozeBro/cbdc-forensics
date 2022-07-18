@@ -110,12 +110,6 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    // p_in("THE PEER SIZE IS %d", peers_.size());
-    // We make sure the request is from a leader
-    //bool valid = req.get_type() != msg_type::request_vote_request && \
-    //    req.get_type() != msg_type::pre_vote_request;
-    // p_in("THE current size, peer_size, and valid is %d %d %d",peers_.size(), peer_size, valid);
-    // peers_.size() >= peer_size - 1 && valid
     if (peers_.size() >= peer_size - 1) {
         p_in("INITIATING VOTE");
         byz_server::initiate_vote();

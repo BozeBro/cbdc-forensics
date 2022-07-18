@@ -6,7 +6,7 @@
 namespace nuraft {
     class byz_server : public verbose_server {
         public:
-            byz_server(context* ctx, const init_options& opt, bool verbose);
+            byz_server(context* ctx, const init_options& opt = init_options(), bool verbose = false);
             ptr<resp_msg> process_req(req_msg& req) override;
         protected:
             void handle_prevote_resp(resp_msg& resp);

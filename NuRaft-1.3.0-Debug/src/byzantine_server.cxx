@@ -108,7 +108,7 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    if (peers_.size() >= peer_size - 1 && get_leader() == req.get_src()) {
+    if (get_leader() == req.get_src()) {
         byz_server::initiate_vote();
     }
     return resp;

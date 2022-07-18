@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "latency_collector.h"
 #include "test_common.h"
+#include <string>
 
 using namespace nuraft;
 using namespace raft_functional_common;
@@ -115,14 +116,15 @@ struct bench_config {
                  size_t _iops = 5,
                  size_t _num_threads = 1,
                  size_t _payload_size = 128)
-        : srv_id_(_srv_id)
+        : byz("")
+        , srv_id_(_srv_id)
         , my_endpoint_(_my_endpoint)
         , duration_(_duration)
         , iops_(_iops)
         , num_threads_(_num_threads)
         , payload_size_(_payload_size)
         {}
-
+    std::string byz;
     size_t srv_id_;
     std::string my_endpoint_;
     size_t duration_;
@@ -134,7 +136,8 @@ struct bench_config {
 
 struct server_stuff {
     server_stuff()
-        : server_id_(1)
+        : byz("")
+        , server_id_(1)
         , addr_("localhost")
         , port_(25000)
         {}
@@ -142,7 +145,7 @@ struct server_stuff {
     dummy_sm* get_sm() {
         return static_cast<dummy_sm*>(sm_.get());
     }
-
+    std::string byz;
     int server_id_;
     std::string addr_;
     int port_;
@@ -207,7 +210,9 @@ int init_raft(server_stuff& stuff) {
                                 rpc_cli_factory,
                                 scheduler,
                                 params );
-    stuff.raft_instance_ = cs_new<raft_server>(ctx);
+    std::string byz = "vm";
+    if (byz == stuff.byz) stuff.raft_instance_ = cs_new<byz_server>(ctx);
+    else stuff.raft_instance_ = cs_new<raft_server>(ctx);
 
     // Listen.
     stuff.asio_listener_->listen( stuff.raft_instance_ );
@@ -350,6 +355,7 @@ void write_latency_distribution() {
 
 int bench_main(const bench_config& config) {
     server_stuff stuff;
+    stuff.byz = config.byz;
     stuff.server_id_ = config.srv_id_;
     stuff.endpoint_ = config.my_endpoint_;
 
@@ -452,24 +458,25 @@ void usage(int argc, char** argv) {
 }
 
 bench_config parse_config(int argc, char** argv) {
-    // 0      1           2          3
-    // <exec> <server ID> <endpoint> <duration>
-    // 4      5             6              7         8
+    // 0      1                  2          3          4
+    // <exec> <Byzantine> <server ID> <endpoint> <duration>
+    // 5            6            7             8         9
     // <IOPS> <# pipelines> <payload size> <S2 addr> <S3 addr> ...
-    if (argc < 4) usage(argc, argv);
+    if (argc < 5) usage(argc, argv);
+    std::string byz_flag = argv[1];
 
-    size_t srv_id = atoi( argv[1] );
+    size_t srv_id = atoi( argv[2] );
     if (srv_id < 1) {
         std::cout << "server ID should be greater than zero." << std::endl;
         exit(0);
     }
 
-    std::string my_endpoint = argv[2];
+    std::string my_endpoint = argv[3];
     if (my_endpoint.find("tcp://") == std::string::npos) {
         my_endpoint = "tcp://" + my_endpoint;
     }
 
-    size_t duration = atoi( argv[3] );
+    size_t duration = atoi( argv[4] );
     if (duration < 1) {
         std::cout << "duration should be greater than zero." << std::endl;
         exit(0);
@@ -477,24 +484,26 @@ bench_config parse_config(int argc, char** argv) {
 
     if (srv_id > 1) {
         // Follower.
-        return bench_config(srv_id, my_endpoint, duration);
+        bench_config cfg(srv_id, my_endpoint, duration);
+        cfg.byz = byz_flag;
+        return cfg;
     }
 
-    if (argc < 7) usage(argc, argv);
+    if (argc < 8) usage(argc, argv);
 
-    size_t iops = atoi( argv[4] );
+    size_t iops = atoi( argv[5] );
     if (iops < 1 || iops > 1000000) {
         std::cout << "valid IOPS range: 1 - 1M." << std::endl;
         exit(0);
     }
 
-    size_t num_threads = atoi( argv[5] );
+    size_t num_threads = atoi( argv[6] );
     if (num_threads < 1 || num_threads > 128) {
         std::cout << "valid thread number range: 1 - 128." << std::endl;
         exit(0);
     }
 
-    size_t payload_size = atoi( argv[6] );
+    size_t payload_size = atoi( argv[7] );
     if (payload_size < 1 || payload_size > 16*1024*1024) {
         std::cout << "valid payload size range: 1 byte - 16 MB." << std::endl;
         exit(0);
@@ -502,7 +511,7 @@ bench_config parse_config(int argc, char** argv) {
 
     bench_config ret(srv_id, my_endpoint, duration, iops, num_threads, payload_size);
 
-    for (int ii=7; ii<argc; ++ii) {
+    for (int ii=8; ii<argc; ++ii) {
         std::string cur_endpoint = argv[ii];
         if (cur_endpoint.find("tcp://") == std::string::npos) {
             cur_endpoint = "tcp://" + cur_endpoint;

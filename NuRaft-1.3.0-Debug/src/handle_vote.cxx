@@ -373,13 +373,7 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
          get_num_voting_members(), election_quorum_size);
 
     if (votes_granted_ >= election_quorum_size) {
-        p_in("Server is elected as leader for term %zu", state_->get_term());
         election_completed_ = true;
-        //become_leader();
-        p_in("FAKED BEING LEADER. TRY TO RESTART ELECTION\n");
-        // request_prevote();
-        become_follower();
-        become_follower();
         initiate_vote();
         //restart_election_timer();
         // p_in("  === LEADER (term %zu) ===\n", state_->get_term());

@@ -18,7 +18,7 @@
 namespace nuraft {
 byz_server::byz_server(context* ctx, const init_options& opt, bool verbose) 
             : verbose_server::verbose_server(ctx, opt, verbose)
-            {}
+            {p_in("I AM BYZANTINE");}
 ptr<resp_msg> byz_server::process_req(req_msg& req) {
     cb_func::Param param(id_, leader_);
     param.ctx = &req;

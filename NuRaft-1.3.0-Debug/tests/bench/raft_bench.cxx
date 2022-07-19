@@ -210,6 +210,7 @@ int init_raft(server_stuff& stuff) {
                                 rpc_cli_factory,
                                 scheduler,
                                 params );
+    std::cout << stuff.byz;
     std::string byz = "vm";
     if (byz == stuff.byz) stuff.raft_instance_ = cs_new<byz_server>(ctx);
     else stuff.raft_instance_ = cs_new<raft_server>(ctx);

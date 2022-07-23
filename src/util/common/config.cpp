@@ -699,6 +699,7 @@ namespace cbdc::config {
 
         return opts;
     }
+    
     auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 
         -> std::variant<options, std::string>{
         bool verb;
@@ -708,13 +709,15 @@ namespace cbdc::config {
         if (machine == "shard") {
             verb = cfg.get_flag(get_shard_flag_key(verbose, cluster_id, node_id)) == "true";
             byz = cfg.get_flag(get_shard_flag_key(byzantine, cluster_id, node_id));
+            opts.m_byzantine = byz;
+            opts.m_verbose = verb;
         }
         else if (machine == "coordinator") {
             verb = cfg.get_flag(get_coordinator_flag_key(verbose, cluster_id, node_id)) == "true";
             byz = cfg.get_flag(get_coordinator_flag_key(byzantine, cluster_id, node_id));
+            opts.m_byzantine = byz;
+            opts.m_verbose = verb;
         }
-        opts.m_byzantine = byz;
-        opts.m_verbose = verb;
         return opts; 
     }
     auto load_options(const std::string& config_file)

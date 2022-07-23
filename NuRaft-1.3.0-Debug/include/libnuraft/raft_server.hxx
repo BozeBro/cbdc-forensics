@@ -756,7 +756,7 @@ protected:
     void commit(ulong target_idx);
     void snapshot_and_compact(ulong committed_idx);
     bool update_term(ulong term);
-    void reconfigure(const ptr<cluster_config>& new_config);
+    virtual void reconfigure(const ptr<cluster_config>& new_config);
     void update_target_priority();
     void decay_target_priority();
     bool reconnect_client(peer& p);

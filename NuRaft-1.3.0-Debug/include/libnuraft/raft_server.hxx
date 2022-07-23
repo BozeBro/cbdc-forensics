@@ -732,8 +732,8 @@ protected:
     void handle_append_entries_resp(resp_msg& resp);
     void handle_install_snapshot_resp(resp_msg& resp);
     void handle_install_snapshot_resp_new_member(resp_msg& resp);
-    void handle_prevote_resp(resp_msg& resp);
-    void handle_vote_resp(resp_msg& resp);
+    virtual void handle_prevote_resp(resp_msg& resp);
+    virtual void handle_vote_resp(resp_msg& resp);
     void handle_priority_change_resp(resp_msg& resp);
     void handle_reconnect_resp(resp_msg& resp);
     void handle_custom_notification_resp(resp_msg& resp);

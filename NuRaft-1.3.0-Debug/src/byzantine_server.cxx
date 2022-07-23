@@ -16,8 +16,8 @@
 #include <iostream>
 #include <algorithm>
 namespace nuraft {
-byz_server::byz_server(context* ctx, const init_options& opt, bool verbose) 
-            : verbose_server::verbose_server(ctx, opt, verbose)
+byz_server::byz_server(context* ctx, const init_options& opt) 
+            : raft_server::raft_server(ctx, opt)
             {p_in("I AM BYZANTINE");}
 ptr<resp_msg> byz_server::process_req(req_msg& req) {
     cb_func::Param param(id_, leader_);
@@ -108,8 +108,8 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    if (peer_size <= 1)
-        request_prevote();
+    if (commence)
+        initiate_vote();
     return resp;
 }
 

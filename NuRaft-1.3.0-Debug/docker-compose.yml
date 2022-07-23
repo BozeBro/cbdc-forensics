@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  leader:
+    build: . 
+    image: nuraft 
+    command: ./build/tests/raft_bench 1 10.10.10.1:12345 240 100 2 256 10.10.10.2:11111 10.10.10.3:22222
+    #command: " "
+    depends_on:
+      - follower1
+      - follower2
+    volumes:
+      - benchmark:/data
+  follower1:
+    build: . 
+    image: nuraft 
+    command: ./build/tests/raft_bench 2 10.10.10.2:11111 3600
+    volumes:
+      - benchmark:/data
+    # command: "ls /NuRaft-1.3.0-Debug/data"
+  follower2:
+    build: . 
+    image: nuraft 
+    command: ["./build/tests/raft_bench", "3", "10.10.10.3:22222", "3600", "-1"]
+    volumes:
+      - benchmark:/data
+    # command: " "
+volumes:
+  benchmark:
+    driver: local
+    driver_opts:
+       o: bind
+       type: none
+       device: ~/data

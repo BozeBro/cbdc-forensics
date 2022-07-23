@@ -339,7 +339,6 @@ ptr<resp_msg> raft_server::handle_vote_req(req_msg& req) {
     return resp;
 }
 void byz_server::handle_vote_resp(resp_msg& resp) {
-    p_in("HANDLING VOTE RESPONSE NOW!");
     if (election_completed_) {
         p_in("Election completed, will ignore the voting result from this server");
         return;
@@ -374,7 +373,8 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
 
     if (votes_granted_ >= election_quorum_size) {
         election_completed_ = true;
-        initiate_vote();
+        // initiate_vote();
+        request_prevote();
         //restart_election_timer();
         // p_in("  === LEADER (term %zu) ===\n", state_->get_term());
     }
@@ -467,6 +467,82 @@ ptr<resp_msg> raft_server::handle_prevote_req(req_msg& req) {
     }
 
     return resp;
+}
+void byz_server::handle_prevote_resp(resp_msg& resp) {
+    if (resp.get_term() != pre_vote_.term_) {
+        // Vote response for other term. Should ignore it.
+        p_in("[PRE-VOTE RESP] from peer %d, my role %s, "
+             "but different resp term %zu (pre-vote term %zu). "
+             "ignore it.",
+             resp.get_src(), srv_role_to_string(role_).c_str(),
+             resp.get_term(), pre_vote_.term_);
+        return;
+    }
+
+    if (resp.get_accepted()) {
+        // Accept: means that this peer is not receiving HB.
+        pre_vote_.dead_++;
+    } else {
+        if (resp.get_next_idx() != std::numeric_limits<ulong>::max()) {
+            // Deny: means that this peer still sees leader.
+            pre_vote_.live_++;
+        } else {
+            // `next_idx_for_resp == MAX`, it is a special signal
+            // indicating that this node has been already removed.
+            pre_vote_.abandoned_++;
+        }
+    }
+
+    int32 election_quorum_size = get_quorum_for_election() + 1;
+
+    p_in("[PRE-VOTE RESP] peer %d (%s), term %zu, resp term %zu, "
+         "my role %s, dead %d, live %d, "
+         "num voting members %d, quorum %d\n",
+         resp.get_src(), (resp.get_accepted())?"O":"X",
+         pre_vote_.term_, resp.get_term(),
+         srv_role_to_string(role_).c_str(),
+         pre_vote_.dead_.load(), pre_vote_.live_.load(),
+         get_num_voting_members(), election_quorum_size);
+
+    if (pre_vote_.dead_ >= election_quorum_size) {
+        p_in("[PRE-VOTE DONE] SUCCESS, term %zu", pre_vote_.term_);
+
+        bool exp = false;
+        bool val = true;
+        if (pre_vote_.done_.compare_exchange_strong(exp, val)) {
+            p_in("[PRE-VOTE DONE] initiate actual vote");
+
+            // Immediately initiate actual vote.
+            initiate_vote();
+
+            // restart the election timer if this is not yet a leader
+            if (role_ != srv_role::leader) {
+                restart_election_timer();
+            }
+
+        } else {
+            p_in("[PRE-VOTE DONE] actual vote is already initiated, do nothing");
+        }
+    }
+    /*
+    if (pre_vote_.live_ >= election_quorum_size) {
+        pre_vote_.quorum_reject_count_.fetch_add(1);
+        p_wn("[PRE-VOTE] rejected by quorum, count %zu",
+             pre_vote_.quorum_reject_count_.load());
+        if ( pre_vote_.quorum_reject_count_ >=
+                 raft_server::raft_limits_.pre_vote_rejection_limit_ ) {
+            p_ft("too many pre-vote rejections, probably this node is not "
+                 "receiving heartbeat from leader. "
+                 "we should re-establish the network connection");
+            // send_reconnect_request();
+        }
+    }
+    */
+
+    if (pre_vote_.abandoned_ >= election_quorum_size) {
+        p_er("[PRE-VOTE DONE] this node has been removed, stepping down");
+        steps_to_down_ = 2;
+    }
 }
 
 void raft_server::handle_prevote_resp(resp_msg& resp) {

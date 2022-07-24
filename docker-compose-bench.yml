@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+
+  test-2pc:
+    build: .
+    image: opencbdc-tx
+    tty: true
+    command: ./build/tools/shard-seeder/shard-seeder 2pc-compose.cfg
+    networks:
+      - 2pc-network
+networks:
+  2pc-network:
+    name: 2pc-network

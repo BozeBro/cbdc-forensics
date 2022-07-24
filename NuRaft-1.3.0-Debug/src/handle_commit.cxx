@@ -19,7 +19,7 @@ limitations under the License.
 **************************************************************************/
 
 #include "raft_server.hxx"
-
+#include "byzantine_server.hxx"
 #include "cluster_config.hxx"
 #include "error_code.hxx"
 #include "handle_client_request.hxx"
@@ -761,8 +761,12 @@ void raft_server::reconfigure(const ptr<cluster_config>& new_config) {
          "%smy id: %d, leader: %d, term: %zu",
          new_config->get_log_idx(), new_config->get_prev_log_idx(),
          str_buf.c_str(), id_, leader_.load(), state_->get_term());
-
     update_target_priority();
+}
+
+void byz_server::reconfigure(const ptr<cluster_config>& new_config) {
+    raft_server::reconfigure(new_config);
+    if (new_config->get_servers().size() == peer_size) commence = true;
 }
 
 void raft_server::remove_peer_from_peers(const ptr<peer>& pp) {

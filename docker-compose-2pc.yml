@@ -145,22 +145,22 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-  shard03:
-    build: .
-    image: opencbdc-tx
-    tty: true
-    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 3
-    expose:
-      - "7888"
-    ports:
-      - 1111:1111
-    networks:
-      - 2pc-network
-    healthcheck:
-      test: ["CMD-SHELL", "netstat -ltn | grep -c 6888"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+#  shard03:
+#    build: .
+#    image: opencbdc-tx
+#    tty: true
+#    command: ./build/src/uhs/twophase/locking_shard/locking-shardd 2pc-compose.cfg 0 3
+#    expose:
+#      - "7888"
+#    ports:
+#      - 1111:1111
+#    networks:
+#      - 2pc-network
+#    healthcheck:
+#      test: ["CMD-SHELL", "netstat -ltn | grep -c 6888"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
 #  shard04:
 #    build: .
 #    image: opencbdc-tx

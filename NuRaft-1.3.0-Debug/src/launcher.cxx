@@ -53,7 +53,7 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
     bool is_verbose = params_given.verbose; 
     std::string byz_type = params_given.is_byzantine;
     if (byz_type == "vm") raft_instance_ = cs_new<byz_server>(ctx, opt); 
-    else raft_instance_ = cs_new<raft_server>(ctx, opt, is_verbose); 
+    else raft_instance_ = cs_new<raft_server>(ctx, opt); 
     asio_listener_->listen( raft_instance_ );
     return raft_instance_;
 }

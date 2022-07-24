@@ -108,7 +108,7 @@ ptr<resp_msg> byz_server::process_req(req_msg& req) {
               resp->get_term(),
               resp->get_next_idx() );
     }
-    if (commence)
+    if (commence && is_leader_alive())
         initiate_vote();
     return resp;
 }

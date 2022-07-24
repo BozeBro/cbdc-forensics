@@ -374,6 +374,7 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
     if (votes_granted_ >= election_quorum_size) {
         election_completed_ = true;
         // initiate_vote();
+        become_follower();
         request_prevote();
         //restart_election_timer();
         // p_in("  === LEADER (term %zu) ===\n", state_->get_term());

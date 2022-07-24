@@ -1,13 +1,10 @@
 /************************************************************************
 Copyright 2017-2019 eBay Inc.
 Author/Developer(s): Jung-Sang Ahn
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     https://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +18,8 @@ limitations under the License.
 
 #include "latency_collector.h"
 #include "test_common.h"
-#include <string>
-
+#include <iostream>
+#include <cctype>
 using namespace nuraft;
 using namespace raft_functional_common;
 
@@ -116,7 +113,8 @@ struct bench_config {
                  size_t _iops = 5,
                  size_t _num_threads = 1,
                  size_t _payload_size = 128)
-        : byz("")
+        : peer_size(0)
+        , byzantine(0)
         , srv_id_(_srv_id)
         , my_endpoint_(_my_endpoint)
         , duration_(_duration)
@@ -124,7 +122,9 @@ struct bench_config {
         , num_threads_(_num_threads)
         , payload_size_(_payload_size)
         {}
-    std::string byz;
+
+    size_t peer_size;
+    int byzantine;
     size_t srv_id_;
     std::string my_endpoint_;
     size_t duration_;
@@ -136,7 +136,8 @@ struct bench_config {
 
 struct server_stuff {
     server_stuff()
-        : byz("")
+        : peer_size(0)
+        , byzantine(0)
         , server_id_(1)
         , addr_("localhost")
         , port_(25000)
@@ -145,7 +146,8 @@ struct server_stuff {
     dummy_sm* get_sm() {
         return static_cast<dummy_sm*>(sm_.get());
     }
-    std::string byz;
+    size_t peer_size;
+    int byzantine;
     int server_id_;
     std::string addr_;
     int port_;
@@ -172,7 +174,7 @@ struct server_stuff {
 
 int init_raft(server_stuff& stuff) {
     // Create logger for this server.
-    std::string log_file_name = "./srv" +
+    std::string log_file_name = "/data/srv" +
                                 std::to_string( stuff.server_id_ ) +
                                 ".log";
     stuff.log_wrap_ = cs_new<logger_wrapper>( log_file_name, 4 );
@@ -210,10 +212,12 @@ int init_raft(server_stuff& stuff) {
                                 rpc_cli_factory,
                                 scheduler,
                                 params );
-    std::cout << stuff.byz;
-    std::string byz = "vm";
-    if (byz == stuff.byz) stuff.raft_instance_ = cs_new<byz_server>(ctx);
-    else stuff.raft_instance_ = cs_new<raft_server>(ctx);
+    if (stuff.byzantine == -1) {
+        stuff.raft_instance_ = cs_new<byz_server>(ctx); 
+    }
+    else {
+        stuff.raft_instance_ = cs_new<raft_server>(ctx);
+    }
 
     // Listen.
     stuff.asio_listener_->listen( stuff.raft_instance_ );
@@ -340,9 +344,9 @@ void print_config(const bench_config& config) {
 }
 
 void write_latency_distribution() {
-    std::string filename = "raft_latency_" + TestSuite::getTimeStringPlain() + ".log";
-    std::ofstream fs;
-    fs.open(filename);
+    std::string filename = "/data/raft_latency_" + TestSuite::getTimeStringPlain() + ".log";
+    std::ofstream fs(filename);
+    // fs.open(filename);
     if (!fs.good()) return;
 
     for (size_t ii=0; ii<=99; ++ii) {
@@ -356,10 +360,9 @@ void write_latency_distribution() {
 
 int bench_main(const bench_config& config) {
     server_stuff stuff;
-    stuff.byz = config.byz;
     stuff.server_id_ = config.srv_id_;
     stuff.endpoint_ = config.my_endpoint_;
-
+    stuff.byzantine = config.byzantine;
     size_t pos = config.my_endpoint_.rfind(":");
     if (pos == std::string::npos) {
         std::cerr << "wrong endpoint: " << config.my_endpoint_ << std::endl;
@@ -373,7 +376,7 @@ int bench_main(const bench_config& config) {
     }
 
     print_config(config);
-
+    
     CHK_Z( init_raft(stuff) );
     _msg("-----\n");
 
@@ -392,7 +395,9 @@ int bench_main(const bench_config& config) {
         TestSuite::ThreadHolder& h_worker = h_workers[ii];
         h_worker.spawn(&param, worker_func, worker_killer_func);
     }
-
+    std::string filename = "/data/raft_throughput_" + TestSuite::getTimeStringPlain() + ".log";
+    std::ofstream fs(filename);
+    if (!fs.good()) return 1;
     TestSuite::Displayer dd(1, 3);
     dd.init();
     std::vector<size_t> col_width(3, 15);
@@ -409,7 +414,9 @@ int bench_main(const bench_config& config) {
         dd.set( 0, 1, "%zu", cur_ops );
         dd.set( 0, 2, "%s ops/s", TestSuite::throughputStr(cur_ops, cur_us).c_str() );
         dd.print();
+        fs << TestSuite::throughputStr(cur_ops, cur_us).c_str() << std::endl;
     }
+    fs.close();
     param.stop_signal_ = true;
 
     for (size_t ii=0; ii<h_workers.size(); ++ii) {
@@ -459,25 +466,24 @@ void usage(int argc, char** argv) {
 }
 
 bench_config parse_config(int argc, char** argv) {
-    // 0      1                  2          3          4
-    // <exec> <Byzantine> <server ID> <endpoint> <duration>
-    // 5            6            7             8         9
-    // <IOPS> <# pipelines> <payload size> <S2 addr> <S3 addr> ...
-    if (argc < 5) usage(argc, argv);
-    std::string byz_flag = argv[1];
+    // 0      1           2          3
+    // <exec> <server ID> <endpoint> <duration>
+    // 4      5             6              7         8              argc - 2         argc - 1
+    // <IOPS> <# pipelines> <payload size> <S2 addr> <S3 addr> ... <peer_size> <byzantine flag>
+    if (argc < 4) usage(argc, argv);
 
-    size_t srv_id = atoi( argv[2] );
+    size_t srv_id = atoi( argv[1] );
     if (srv_id < 1) {
         std::cout << "server ID should be greater than zero." << std::endl;
         exit(0);
     }
 
-    std::string my_endpoint = argv[3];
+    std::string my_endpoint = argv[2];
     if (my_endpoint.find("tcp://") == std::string::npos) {
         my_endpoint = "tcp://" + my_endpoint;
     }
 
-    size_t duration = atoi( argv[4] );
+    size_t duration = atoi( argv[3] );
     if (duration < 1) {
         std::cout << "duration should be greater than zero." << std::endl;
         exit(0);
@@ -485,26 +491,24 @@ bench_config parse_config(int argc, char** argv) {
 
     if (srv_id > 1) {
         // Follower.
-        bench_config cfg(srv_id, my_endpoint, duration);
-        cfg.byz = byz_flag;
-        return cfg;
+        return bench_config(srv_id, my_endpoint, duration);
     }
 
-    if (argc < 8) usage(argc, argv);
+    if (argc < 7) usage(argc, argv);
 
-    size_t iops = atoi( argv[5] );
+    size_t iops = atoi( argv[4] );
     if (iops < 1 || iops > 1000000) {
         std::cout << "valid IOPS range: 1 - 1M." << std::endl;
         exit(0);
     }
 
-    size_t num_threads = atoi( argv[6] );
+    size_t num_threads = atoi( argv[5] );
     if (num_threads < 1 || num_threads > 128) {
         std::cout << "valid thread number range: 1 - 128." << std::endl;
         exit(0);
     }
 
-    size_t payload_size = atoi( argv[7] );
+    size_t payload_size = atoi( argv[6] );
     if (payload_size < 1 || payload_size > 16*1024*1024) {
         std::cout << "valid payload size range: 1 byte - 16 MB." << std::endl;
         exit(0);
@@ -512,7 +516,7 @@ bench_config parse_config(int argc, char** argv) {
 
     bench_config ret(srv_id, my_endpoint, duration, iops, num_threads, payload_size);
 
-    for (int ii=8; ii<argc; ++ii) {
+    for (int ii=7; ii<argc; ++ii) {
         std::string cur_endpoint = argv[ii];
         if (cur_endpoint.find("tcp://") == std::string::npos) {
             cur_endpoint = "tcp://" + cur_endpoint;
@@ -528,14 +532,19 @@ using namespace raft_bench;
 
 int main(int argc, char** argv) {
     TestSuite ts(argc, argv);
-
-    bench_config config  = parse_config(argc, argv);
-
+    bench_config config; 
+    int s = atoi (argv[argc - 1]);
+    if (argc > 0 && s == -1) {
+        config  = parse_config(argc - 2, argv);
+        config.byzantine = -1;
+        config.peer_size = static_cast<size_t>(atoi (argv[argc - 2]));
+    }
+    else {
+        config  = parse_config(argc, argv);
+    }
     ts.options.printTestMessage = true;
 
     ts.doTest("bench main", bench_main, config);
 
     return 0;
 }
-
-

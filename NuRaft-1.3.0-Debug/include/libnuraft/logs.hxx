@@ -1,7 +1,9 @@
 #ifndef _LOG_BASE_HXX_
 #define _LOG_BASE_HXX_
+
 #include "raft_server.hxx"
 #include <vector>
+
 namespace nuraft {
     enum activity {
         null_state     = -1,
@@ -18,8 +20,8 @@ namespace nuraft {
         ignore_votes   = 10
     };
 
-    class log_server : public raft_server {
-        using raft_server::raft_server; 
+    class log_server : public raft_server{
+        using raft_server::raft_server;
         public:
             void set_state(activity act);
             void set_state(activity act, req_msg& req);

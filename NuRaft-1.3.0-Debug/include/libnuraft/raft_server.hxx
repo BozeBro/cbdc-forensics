@@ -694,8 +694,8 @@ protected:
     size_t get_num_stale_peers();
 
     ptr<resp_msg> handle_append_entries(req_msg& req);
-    ptr<resp_msg> handle_prevote_req(req_msg& req);
-    ptr<resp_msg> handle_vote_req(req_msg& req);
+    virtual ptr<resp_msg> handle_prevote_req(req_msg& req);
+    virtual ptr<resp_msg> handle_vote_req(req_msg& req);
     ptr<resp_msg> handle_cli_req_prelock(req_msg& req);
     ptr<resp_msg> handle_cli_req(req_msg& req);
     ptr<resp_msg> handle_cli_req_callback(ptr<commit_ret_elem> elem,
@@ -723,9 +723,9 @@ protected:
     bool handle_snapshot_sync_req(snapshot_sync_req& req);
 
     bool check_cond_for_zp_election();
-    void request_prevote();
+    virtual void request_prevote();
     void initiate_vote(bool force_vote = false);
-    void request_vote(bool force_vote);
+    virtual void request_vote(bool force_vote);
     void request_append_entries();
     bool request_append_entries(ptr<peer> p);
     virtual void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
@@ -738,7 +738,7 @@ protected:
     void handle_reconnect_resp(resp_msg& resp);
     void handle_custom_notification_resp(resp_msg& resp);
 
-    bool try_update_precommit_index(ulong desired, const size_t MAX_ATTEMPTS = 10);
+    virtual bool try_update_precommit_index(ulong desired, const size_t MAX_ATTEMPTS = 10);
 
     void handle_ext_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
     void handle_ext_resp_err(rpc_exception& err);
@@ -753,15 +753,15 @@ protected:
     bool check_snapshot_timeout(ptr<peer> pp);
     void destroy_user_snp_ctx(ptr<snapshot_sync_ctx> sync_ctx);
     void clear_snapshot_sync_ctx(peer& pp);
-    void commit(ulong target_idx);
+    virtual void commit(ulong target_idx);
     void snapshot_and_compact(ulong committed_idx);
     bool update_term(ulong term);
     virtual void reconfigure(const ptr<cluster_config>& new_config);
     void update_target_priority();
     void decay_target_priority();
     bool reconnect_client(peer& p);
-    void become_leader();
-    void become_follower();
+    virtual void become_leader();
+    virtual void become_follower();
     void check_srv_to_leave_timeout();
     void enable_hb_for_peer(peer& p);
     void stop_election_timer();

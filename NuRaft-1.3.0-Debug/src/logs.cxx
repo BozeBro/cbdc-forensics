@@ -4,21 +4,22 @@
 #include <iostream>
 namespace nuraft{
     void log_server::set_state(activity act, req_msg& req) {
+        int32 src{req.get_src()};
         switch (act) {
             // prevote
             case reject_prevote: {
-                std::cout << "Rejecting prevote from " << req.get_src() << '\n';
+                std::cout << "Rejecting prevote from " << src << '\n';
                 return;
             }
             case accept_prevote: {
-                std::cout << "Accepting prevote from " << req.get_src() << '\n';
+                std::cout << "Accepting prevote from " << src << '\n';
                 return;
             }
             case accept_vote: {
-                std::cout << "Accepting vote from " << req.get_src() << '\n';
+                std::cout << "Accepting vote from " << src << '\n';
             }
             case reject_vote: {
-                std::cout << "Rejecting vote from " << req.get_src() << '\n';
+                std::cout << "Rejecting vote from " << src << '\n';
                 return; 
             }
             default:

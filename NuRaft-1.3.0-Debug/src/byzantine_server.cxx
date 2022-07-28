@@ -17,7 +17,7 @@
 #include <algorithm>
 namespace nuraft {
 byz_server::byz_server(context* ctx, const init_options& opt) 
-            : raft_server::raft_server(ctx, opt)
+            : log_server::log_server(ctx, opt)
             {p_in("I AM BYZANTINE");}
 ptr<resp_msg> byz_server::process_req(req_msg& req) {
     cb_func::Param param(id_, leader_);

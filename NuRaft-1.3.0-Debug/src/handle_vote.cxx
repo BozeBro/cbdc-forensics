@@ -30,6 +30,7 @@ limitations under the License.
 
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 namespace nuraft {
 
@@ -374,6 +375,7 @@ void byz_server::handle_vote_resp(resp_msg& resp) {
     if (votes_granted_ >= election_quorum_size) {
         election_completed_ = true;
         // initiate_vote();
+        std::cout << "Ignoring quorum of votes\n";
         become_follower();
         request_prevote();
         //restart_election_timer();

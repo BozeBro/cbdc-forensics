@@ -7,7 +7,8 @@ RUN apt update && \
       cmake \ 
       openssl \ 
       libssl-dev \
-      libz-dev
+      libz-dev \ 
+      git
 
 # Set working directory
 WORKDIR /NuRaft-1.3.0-Debug

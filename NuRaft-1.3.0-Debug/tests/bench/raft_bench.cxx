@@ -395,9 +395,6 @@ int bench_main(const bench_config& config) {
         TestSuite::ThreadHolder& h_worker = h_workers[ii];
         h_worker.spawn(&param, worker_func, worker_killer_func);
     }
-    std::string filename = "/data/raft_throughput_" + TestSuite::getTimeStringPlain() + ".log";
-    std::ofstream fs(filename);
-    if (!fs.good()) return 1;
     TestSuite::Displayer dd(1, 3);
     dd.init();
     std::vector<size_t> col_width(3, 15);
@@ -414,9 +411,7 @@ int bench_main(const bench_config& config) {
         dd.set( 0, 1, "%zu", cur_ops );
         dd.set( 0, 2, "%s ops/s", TestSuite::throughputStr(cur_ops, cur_us).c_str() );
         dd.print();
-        fs << TestSuite::throughputStr(cur_ops, cur_us).c_str() << std::endl;
     }
-    fs.close();
     param.stop_signal_ = true;
 
     for (size_t ii=0; ii<h_workers.size(); ++ii) {
@@ -443,7 +438,12 @@ int bench_main(const bench_config& config) {
     _msg("-----\n");
 
     write_latency_distribution();
-
+    std::string filename = "/data/raft_log1.log";
+    std::ofstream fs(filename);
+    if (!fs.good()) return 1;
+    ulong ind = stuff.raft_instance_->get_committed_log_idx();
+    fs << ind << std::endl; 
+    fs.close();
     return 0;
 }
 

@@ -14,7 +14,7 @@ WORKDIR /NuRaft-1.3.0-Debug
 
 # Copy source
 COPY . .
-
+RUN mkdir /data
 # Use the raft that is already installed
 RUN ./prepare.sh && \ 
     rm -rf build && \ 

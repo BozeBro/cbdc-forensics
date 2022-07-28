@@ -35,6 +35,7 @@ limitations under the License.
 #include "log_entry.hxx"
 #include "log_store.hxx"
 #include "logger.hxx"
+#include "logs.hxx"
 #include "ptr.hxx"
 #include "raft_params.hxx"
 #include "verbose_server.hxx"

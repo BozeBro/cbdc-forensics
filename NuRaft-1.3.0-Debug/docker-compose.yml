@@ -21,7 +21,7 @@ services:
   follower2:
     build: . 
     image: nuraft 
-    command: ["./build/tests/raft_bench", "3", "10.10.10.3:22222", "3600"]
+    command: ["./build/tests/raft_bench", "3", "10.10.10.3:22222", "3600", "0", "-1"]
     volumes:
       - benchmark:/data
     # command: " "

@@ -4,5 +4,5 @@ services:
   leader:
     build: .
     image: nuraft
-    command: ["./build/tests/srv_bench", "1", "./configs/base.json", "-ljsoncpp"]
+    command: ["./build/tests/srv_bench", "2", "./configs/base.json", "-ljsoncpp"]
     # command: "ls build/tests"

@@ -53,7 +53,9 @@ target_link_libraries(cli_bench
                  ${LIBRARIES}
                  jsoncpp_lib)
 add_executable(srv_bench
-               cbdc_bench/srv_bench/server.cxx)
+               cbdc_bench/srv_bench/server.cxx
+               ${EXAMPLES_SRC}/logger.cc
+               ${EXAMPLES_SRC}/in_memory_log_store.cxx)
 add_dependencies(srv_bench
                  static_lib)
 target_link_libraries(srv_bench

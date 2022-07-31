@@ -42,7 +42,21 @@ add_dependencies(raft_bench
 target_link_libraries(raft_bench
                       ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
                       ${LIBRARIES})
-
+# === CBDC Benchmark version ===
+add_executable(cli_bench
+               cbdc_bench/client_bench/client.cxx)
+add_dependencies(cli_bench
+                 static_lib)
+target_link_libraries(cli_bench
+                 ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
+                 ${LIBRARIES})
+add_executable(srv_bench
+               cbdc_bench/srv_bench/server.cxx)
+add_dependencies(srv_bench
+                 static_lib)
+target_link_libraries(srv_bench
+                 ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
+                 ${LIBRARIES})
 
 # === Other modules ===
 add_executable(buffer_test

@@ -43,20 +43,23 @@ target_link_libraries(raft_bench
                       ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
                       ${LIBRARIES})
 # === CBDC Benchmark version ===
+find_package(jsoncpp REQUIRED)
 add_executable(cli_bench
                cbdc_bench/client_bench/client.cxx)
 add_dependencies(cli_bench
                  static_lib)
 target_link_libraries(cli_bench
                  ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
-                 ${LIBRARIES})
+                 ${LIBRARIES}
+                 jsoncpp_lib)
 add_executable(srv_bench
                cbdc_bench/srv_bench/server.cxx)
 add_dependencies(srv_bench
                  static_lib)
 target_link_libraries(srv_bench
                  ${BUILD_DIR}/${LIBRARY_OUTPUT_NAME}
-                 ${LIBRARIES})
+                 ${LIBRARIES}
+                 jsoncpp_lib)
 
 # === Other modules ===
 add_executable(buffer_test

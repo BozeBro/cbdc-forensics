@@ -24,4 +24,4 @@ Null state represents the initial state of a byzantine node. The wrapper will do
 
 ignore_votes reprsents vote monopoly byzantine behavior. A node receives a quorum of votes but chooses not to become leader.
 
-See the implementation in `log.hxx` and `log.cxx`
+See the implementation in [logs.hxx](/NuRaft-1.3.0-Debug/include/libnuraft/logs.hxx) and [log.cxx](/NuRaft-1.3.0-Debug/src/logs.cxx)

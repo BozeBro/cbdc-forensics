@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  leader:
+    build: .
+    image: nuraft
+    command: ["./build/tests/cli_bench", "1"]
+    # command: "ls build/tests"

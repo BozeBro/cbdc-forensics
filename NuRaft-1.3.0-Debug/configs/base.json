@@ -1,9 +1,9 @@
 {
     "client" : {
-        "thread_count": "1",
-        "duration":"100",
-        "iops":"10",
-        "payload": "256"
+        "thread_count": 1,
+        "duration":100,
+        "iops":10,
+        "payload": 1
     },
     "servers" : [
         {"address":"10.10.10.1", "port":"12345"},

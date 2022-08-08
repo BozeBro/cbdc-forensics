@@ -10,7 +10,7 @@ tests/run_unit_tests
 tools/txtester/tx-generator
 tools/txtester/tx-player
 archiverd
-
+NuRaft-1.3.0/
 # ignore generated docs
 doxygen_generated
 

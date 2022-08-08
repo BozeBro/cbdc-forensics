@@ -7,7 +7,7 @@
 namespace nuraft {
     class byz_server : public log_server {
         public:
-            // byz_server(context* ctx, bool verbose, const init_options& opt = init_options());
+            byz_server(context* ctx, bool verbose, const init_options& opt = init_options());
             byz_server(context* ctx, const raft_server::init_options& opt = raft_server::init_options());
             ptr<resp_msg> process_req(req_msg& req);
             bool commence{false};

@@ -53,7 +53,21 @@ namespace cbdc::config {
            << raft_endpoint_postfix;
         return ss.str();
     }
-
+    auto get_shard_flag_key(const std::string& flag, size_t shard_id, size_t node_id)
+        -> std::string {
+            std::stringstream ss; 
+            get_shard_key_prefix(ss, shard_id);
+            ss << node_id << config_separator << flag; 
+            return ss.str();
+    }
+    auto load_flags(size_t cluster_id, size_t node_id, std::string& config_file) 
+        -> std::variant<options, std::string>{
+        auto opts = options{};
+        auto cfg = parser(config_file);
+        bool byz = cfg.get_flag(get_shard_flag_key(byzantine, cluster_id, node_id)) == "true";
+        opts.m_byzantine = byz;
+        return opts; 
+    }
     auto get_atomizer_loglevel_key(size_t atomizer_id) -> std::string {
         std::stringstream ss;
         ss << atomizer_prefix << atomizer_id << config_separator
@@ -783,7 +797,15 @@ namespace cbdc::config {
         -> std::optional<std::string> {
         return get_val<std::string>(key);
     }
-
+    auto parser::get_flag(const std::string& key) const 
+        -> std::string  {
+        const auto val_bool = get_string(key);
+        if (!val_bool.has_value()) {
+            return ""; 
+        }
+        std::string flag = val_bool.value();
+        return flag;
+    }
     auto parser::get_ulong(const std::string& key) const
         -> std::optional<size_t> {
         return get_val<size_t>(key);

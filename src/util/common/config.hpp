@@ -67,7 +67,7 @@ namespace cbdc::config {
 
         static constexpr auto log_level = logging::log_level::warn;
     }
-
+    static constexpr auto byzantine        = "byzantine";
     static constexpr auto endpoint_postfix = "endpoint";
     static constexpr auto loglevel_postfix = "loglevel";
     static constexpr auto raft_endpoint_postfix = "raft_endpoint";
@@ -131,6 +131,8 @@ namespace cbdc::config {
 
     /// Project-wide configuration options.
     struct options {
+        /// byzantine flag
+        bool m_byzantine{false};
         /// Depth of the spent transaction cache in the atomizer, in blocks.
         size_t m_stxo_cache_depth{defaults::stxo_cache_depth};
         /// Maximum number of unconfirmed transactions in atomizer-cli.
@@ -273,7 +275,10 @@ namespace cbdc::config {
     ///         message on failure.
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string>;
-
+    // CBDC: Function to obtain the byzantine flags. 
+    // Currently just byzantine and verbose
+    auto load_flags(size_t cluster_id, size_t node_id, std::string& config_file) 
+        -> std::variant<options, std::string>;
     /// Loads options from the given config file and check for invariants.
     /// \param config_file the path to the config file from which load options.
     /// \return valid options struct, or string with error message on failure.
@@ -336,13 +341,6 @@ namespace cbdc::config {
         /// \param stream the generic stream used to add config values.
         explicit parser(std::istream& stream);
 
-        /// Returns the given key if its value is a string.
-        /// \param key key to retrieve.
-        /// \return value associated with the key or std::nullopt if the value
-        ///         was not a string or does not exist.
-        [[nodiscard]] auto get_string(const std::string& key) const
-            -> std::optional<std::string>;
-
         /// Return the value for the given key if its value is a long.
         /// \param key key to retrieve.
         /// \return value associated with the key, or std::nullopt if the value
@@ -356,7 +354,17 @@ namespace cbdc::config {
         ///         was not a endpoint or does not exist.
         [[nodiscard]] auto get_endpoint(const std::string& key) const
             -> std::optional<network::endpoint_t>;
-
+        /// Returns the given key if its value is a string.
+        /// \param key key to retrieve.
+        /// \return value associated with the key or std::nullopt if the value
+        ///         was not a string or does not exist.
+        [[nodiscard]] auto get_string(const std::string& key) const
+            -> std::optional<std::string>;
+        /// Return the value for the given key if verbose flag is given
+        /// \param key key to retrieve.
+        /// \return value associated with the key, false if value not given. 
+        [[nodiscard]] auto get_flag(const std::string& key) const
+            -> std::string;
         /// Return the value for the given key if its value is a loglevel.
         /// \param key key to retrieve.
         /// \return value associated with the key, or std::nullopt if the value

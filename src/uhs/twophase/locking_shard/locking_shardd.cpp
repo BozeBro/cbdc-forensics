@@ -38,7 +38,8 @@ auto main(int argc, char** argv) -> int {
         std::cerr << "Shard node ID not in config file" << std::endl;
         return -1;
     }
-
+    auto flag_opts = cbdc::config::load_flags(machine, shard_id, node_id, args[1]);
+    cfg.m_byzantine = flags.m_byzantine;
     auto logger = std::make_shared<cbdc::logging::log>(
         cfg.m_shard_loglevels[shard_id]);
 

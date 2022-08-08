@@ -53,55 +53,48 @@ static inline std::string msg_if_given
 #define L_FATAL (1)
 
 /*
-Uncomment to put back regular behavior
-#define p_lv(lv, ...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= (lv)) \
-    //     l_->put_details((lv), __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+// Uncomment to put back regular behavior
+#define p_lv(lv, ...) \
+    if (l_ && l_->get_level() >= (lv)) \
+        l_->put_details((lv), __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // trace.
-#define p_tr(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 6) \
-    //     l_->put_details(6, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_tr(...) \
+    if (l_ && l_->get_level() >= 6) \
+        l_->put_details(6, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // debug verbose.
-#define p_dv(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 5) \
-    //     l_->put_details(5, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_dv(...) \
+    if (l_ && l_->get_level() >= 5) \
+        l_->put_details(5, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // debug.
-#define p_db(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 5) \
-    //     l_->put_details(5, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_db(...) \
+    if (l_ && l_->get_level() >= 5) \
+        l_->put_details(5, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // info.
-#define p_in(...) void(0)
-    // \
-    // if !(l_ && l_->get_level() >= 4) \
-    //     l_->put_details(4, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_in(...) \
+    if (l_ && l_->get_level() >= 4) \
+        l_->put_details(4, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // warning.
-#define p_wn(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 3) \
-    //     l_->put_details(3, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_wn(...) \
+    if (l_ && l_->get_level() >= 3) \
+        l_->put_details(3, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // error.
-#define p_er(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 2) \
-    //     l_->put_details(2, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+#define p_er(...) \
+    if (l_ && l_->get_level() >= 2) \
+        l_->put_details(2, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 
 // fatal.
-#define p_ft(...) void(0)
-    // \
-    // if (l_ && l_->get_level() >= 1) \
-    //     l_->put_details(1, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
-*/ 
+#define p_ft(...) \
+    if (l_ && l_->get_level() >= 1) \
+        l_->put_details(1, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
+*/
 
+// replace above codde with this code and use logger
 #define p_lv(...) void(0)
 #define p_tr(...) void(0)
 #define p_dv(...) void(0)

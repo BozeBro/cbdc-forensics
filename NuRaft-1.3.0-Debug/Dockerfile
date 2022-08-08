@@ -9,7 +9,6 @@ RUN apt update && \
   libssl-dev \
   libz-dev \
   git \
-  libjsoncpp-dev
 
 # Set working directory
 WORKDIR /NuRaft-1.3.0-Debug

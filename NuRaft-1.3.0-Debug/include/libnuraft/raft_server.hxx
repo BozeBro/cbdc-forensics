@@ -60,6 +60,13 @@ struct snapshot_sync_ctx;
 class raft_server : public std::enable_shared_from_this<raft_server> {
     friend class nuraft_global_mgr;
 public:
+    // Benedict
+    // [C2, C3]
+    // We make the following functions virtual
+    // commit(), reconfigure, handle_prevote_req
+    // handle_vote_req, handle_vote_resp
+    // request_vote, request_prevote, handle_prevote_resp
+    // try_update_precommit_index
     struct init_options {
         init_options()
             : skip_initial_election_timeout_(false)
@@ -728,7 +735,7 @@ protected:
     virtual void request_vote(bool force_vote);
     void request_append_entries();
     bool request_append_entries(ptr<peer> p);
-    virtual void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
+    void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
     void handle_append_entries_resp(resp_msg& resp);
     void handle_install_snapshot_resp(resp_msg& resp);
     void handle_install_snapshot_resp_new_member(resp_msg& resp);
@@ -826,8 +833,11 @@ protected:
 
 protected:
     static const int default_snapshot_sync_block_size;
+    // Benedict
+    // [C1]
+    // Additional raft attributes for debugging.
     /**
-     * Informs the node the expected size of a cluster.
+     * Informs the node the expected size of a cluster (Includes itself).
      * 
      */
     size_t peer_size;
@@ -852,6 +862,7 @@ protected:
     /**
      * Current limit values.
      */
+    // [C1] end
     static limits raft_limits_;
 
     /**

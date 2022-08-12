@@ -35,12 +35,12 @@ limitations under the License.
 #include "log_entry.hxx"
 #include "log_store.hxx"
 #include "logger.hxx"
-#include "logs.hxx"
+#include "logs.hxx" // Benedict. Add files for compilation
 #include "ptr.hxx"
 #include "raft_params.hxx"
 #include "verbose_server.hxx"
 #include "raft_server.hxx"
-#include "byzantine_server.hxx"
+#include "byzantine_server.hxx" // Benedict. Don't forget to add files for compiling
 #include "rpc_cli_factory.hxx"
 #include "rpc_cli.hxx"
 #include "rpc_listener.hxx"

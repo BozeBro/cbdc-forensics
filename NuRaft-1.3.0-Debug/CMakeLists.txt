@@ -241,7 +241,6 @@ set(RAFT_CORE
     ${ROOT_SRC}/snapshot_sync_req.cxx
     ${ROOT_SRC}/srv_config.cxx
     ${ROOT_SRC}/stat_mgr.cxx
-    ${ROOT_SRC}/verbose_server.cxx
     ${ROOT_SRC}/logs.cxx
     )
 add_library(RAFT_CORE_OBJ OBJECT ${RAFT_CORE})

@@ -38,7 +38,6 @@ limitations under the License.
 #include "logs.hxx" // Benedict. Add files for compilation
 #include "ptr.hxx"
 #include "raft_params.hxx"
-#include "verbose_server.hxx"
 #include "raft_server.hxx"
 #include "byzantine_server.hxx" // Benedict. Don't forget to add files for compiling
 #include "rpc_cli_factory.hxx"

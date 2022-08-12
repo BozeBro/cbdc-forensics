@@ -8,7 +8,7 @@ RUN apt update && \
   openssl \
   libssl-dev \
   libz-dev \
-  git \
+  git
 
 # Set working directory
 WORKDIR /NuRaft-1.3.0-Debug

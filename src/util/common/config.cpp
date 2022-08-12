@@ -247,6 +247,11 @@ namespace cbdc::config {
         ss << public_key_postfix;
         return ss.str();
     }
+    // Benedict 
+    // [C1]
+    // Helper function to grab the flag key from the config file.
+    // e.g. shard0_0_verbose
+    // Follows implicit code style of cbdc
     auto get_shard_flag_key(const std::string& flag, size_t shard_id, size_t node_id)
         -> std::string {
             std::stringstream ss; 
@@ -261,6 +266,7 @@ namespace cbdc::config {
             ss << node_id << config_separator << flag; 
             return ss.str();
     }
+    // [C1] end
     auto read_shard_endpoints(options& opts, const parser& cfg)
         -> std::optional<std::string> {
         const auto shard_count = cfg.get_ulong(shard_count_key).value_or(0);
@@ -631,8 +637,10 @@ namespace cbdc::config {
         opts.m_loadgen_count
             = cfg.get_ulong(loadgen_count_key).value_or(opts.m_loadgen_count);
     }
-    // WE assume that load_number works as expected since it will be after the original 
-    // implementation that checks for valid input
+    // Benedict
+    // [C1] Implementation of load_number
+    // we call this function after original impl validates input
+    // Should only be called by shard and coordinator roles
     size_t load_number(std::string& machine, size_t cluster_id, std::string& config_file) {
         auto cfg = parser(config_file);
         if (machine == "shard") {
@@ -653,6 +661,7 @@ namespace cbdc::config {
         // No other machine type should be implemented right now. 
         return 0; 
     }
+    // [C1] end
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string> {
         auto opts = options{};
@@ -699,7 +708,9 @@ namespace cbdc::config {
 
         return opts;
     }
-    
+    // Benedict 
+    // [C1]
+    // Function impl to load flags from config file for coordinator and shard
     auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 
         -> std::variant<options, std::string>{
         bool verb;
@@ -720,6 +731,7 @@ namespace cbdc::config {
         }
         return opts; 
     }
+    // [C1] endline
     auto load_options(const std::string& config_file)
         -> std::variant<options, std::string> {
         auto opt = read_options(config_file);
@@ -856,7 +868,9 @@ namespace cbdc::config {
 
         return parse_ip_port(val_str.value());
     }
-
+    // Benedict 
+    // [C1]
+    // Helper function to grab the value from a key in config
     auto parser::get_flag(const std::string& key) const 
         -> std::string  {
         const auto val_bool = get_string(key);
@@ -866,7 +880,7 @@ namespace cbdc::config {
         std::string flag = val_bool.value();
         return flag;
     }
-    
+    // [C1] end
     auto parser::get_loglevel(const std::string& key) const
         -> std::optional<logging::log_level> {
         const auto val_str = get_string(key);

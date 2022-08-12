@@ -28,6 +28,7 @@ auto main(int argc, char** argv) -> int {
     auto shard_id = std::stoull(args[2]);
     auto node_id = std::stoull(args[3]);
     auto cfg = std::get<cbdc::config::options>(cfg_or_err);
+
     if(cfg.m_locking_shard_endpoints.size() <= shard_id) {
         std::cerr << "Shard ID not in config file" << std::endl;
         return -1;
@@ -37,7 +38,11 @@ auto main(int argc, char** argv) -> int {
         std::cerr << "Shard node ID not in config file" << std::endl;
         return -1;
     }
-    // CBDC: Adding flags
+    /* Benedict 
+    [C1]
+    getting the role of a node, loading the flags, loading cluster id, 
+
+    */
     std::string machine = "shard";
     auto flag_opts = cbdc::config::load_flags(machine, shard_id, node_id, args[1]);
     size_t  cluster_number = cbdc::config::load_number(machine, shard_id, args[1]);
@@ -45,6 +50,7 @@ auto main(int argc, char** argv) -> int {
     cfg.m_verbose = flags.m_verbose;
     cfg.m_byzantine = flags.m_byzantine;
     cfg.m_size =  cluster_number; 
+    // [C1] end
     auto logger = std::make_shared<cbdc::logging::log>(
         cfg.m_shard_loglevels[shard_id]);
 

@@ -280,9 +280,13 @@ namespace cbdc::config {
     ///         message on failure.
     auto read_options(const std::string& config_file)
         -> std::variant<options, std::string>;
+    // Benedict
+    // [C1]
     /// Get the number of nodes in a cluster.
     size_t load_number(std::string& machine, size_t cluster_id, std::string& config_file);
-    // CBDC: Function to obtain the byzantine flags. 
+    // Benedict
+    // [C1]
+    // Function to obtain the byzantine flags. 
     // Currently just byzantine and verbose
     auto load_flags(std::string& machine, size_t cluster_id, size_t node_id, std::string& config_file) 
         -> std::variant<options, std::string>;
@@ -373,6 +377,8 @@ namespace cbdc::config {
         ///         was not a endpoint or does not exist.
         [[nodiscard]] auto get_endpoint(const std::string& key) const
             -> std::optional<network::endpoint_t>;
+        /// Benedict
+        /// [C1]
         /// Return the value for the given key if verbose flag is given
         /// \param key key to retrieve.
         /// \return value associated with the key, false if value not given. 

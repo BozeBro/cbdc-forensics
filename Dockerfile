@@ -35,6 +35,8 @@ WORKDIR /opt/tx-processor
 # Copy source
 COPY . .
 
+# Benedict 
+# Downloading NuRaft into directory instead of grabbing online
 # Use the raft that is already installed
 RUN cd "./NuRaft-${NURAFT_VERSION}-${CMAKE_BUILD_TYPE}" && \
     # wget https://github.com/eBay/NuRaft/archive/v${NURAFT_VERSION}.tar.gz && \

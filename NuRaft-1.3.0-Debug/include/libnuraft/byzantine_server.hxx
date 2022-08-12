@@ -7,15 +7,23 @@
 namespace nuraft {
     class byz_server : public log_server {
         public:
-            byz_server(context* ctx, bool verbose, const init_options& opt = init_options());
-            byz_server(context* ctx, const raft_server::init_options& opt = raft_server::init_options());
+            // Benedict
+            // [C2]
+            using log_server::log_server;
+            // This is where we start an election illegally
             ptr<resp_msg> process_req(req_msg& req);
+            // flag to notify when to start attack
+            // start attack after all servers have been added to the cluster.
             bool commence{false};
         protected:
+            // Ignore the results of the votes
             void handle_vote_resp(resp_msg& resp);
-            void handle_peer_resp(ptr<resp_msg>& resp, ptr<rpc_exception>& err);
+            // Sending too many prevotes means program termination for byzantine node
+            // Ignore statement to terminate and continue
             void handle_prevote_resp(resp_msg& resp);
+            // If all servers have been added, commence is true here.
             void reconfigure(const ptr<cluster_config>& new_config);
+            // [C2] end
     };
 }
 #endif // _BYZANTINE_SERVER_HXX_

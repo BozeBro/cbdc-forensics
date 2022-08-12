@@ -528,6 +528,9 @@ void byz_server::handle_prevote_resp(resp_msg& resp) {
         }
     }
     /*
+    // Benedict
+    // [C2] We do not want to stop running if we send too many prevotes
+    // ignore entire section
     if (pre_vote_.live_ >= election_quorum_size) {
         pre_vote_.quorum_reject_count_.fetch_add(1);
         p_wn("[PRE-VOTE] rejected by quorum, count %zu",
@@ -540,6 +543,7 @@ void byz_server::handle_prevote_resp(resp_msg& resp) {
             // send_reconnect_request();
         }
     }
+    [C2] end
     */
 
     if (pre_vote_.abandoned_ >= election_quorum_size) {

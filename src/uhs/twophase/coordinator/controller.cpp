@@ -65,17 +65,18 @@ namespace cbdc::coordinator {
         m_start_thread = std::thread([&] {
             start_stop_func();
         });
-
-        // Initialize NuRaft with the state machine we just created. Register
-        // our callback function to notify us when we become a leader or
-        // follower.
+        // Benedict
+        // [C1]
+        // Passing parameters to NuRaft
         m_raft_params.verbose  = m_opts.m_verbose;
         m_raft_params.is_byzantine = m_opts.m_byzantine;
         m_raft_params.node_id  = static_cast<int>(m_node_id);
         m_raft_params.cluster_id = static_cast<int>(m_coordinator_id); 
-        // std::cout << "CBDC verbose" <<m_raft_params.verbose << "\n"; 
-        // std::cout << "CBDC byzantine" << m_raft_params.is_byzantine << "\n"; 
         m_raft_params.machine_type = "coordinator";
+        // [C1] end
+        // Initialize NuRaft with the state machine we just created. Register
+        // our callback function to notify us when we become a leader or
+        // follower.
         if(!m_raft_serv.init(m_raft_params)) {
             return false;
         }

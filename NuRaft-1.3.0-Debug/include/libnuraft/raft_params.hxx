@@ -64,7 +64,9 @@ struct raft_params {
          */
         dual_rw_lock = 0x2,
     };
-
+    // Benedict
+    // [C1]
+    // Creating default values upon initialization
     raft_params()
         : 
         peer_size(0)
@@ -344,6 +346,9 @@ struct raft_params {
     }
 
 public:
+    // Benedict
+    // [C1]
+    // Adding values into raft_params to access in init function
     size_t peer_size; 
     /**
      * If True, outputs more debugger messages.
@@ -366,6 +371,7 @@ public:
      * If a raft, shard node, the index of the shard
      */
     int32 cluster_id; 
+    // [C1] end
     /**
      * Upper bound of election timer, in millisecond.
      */

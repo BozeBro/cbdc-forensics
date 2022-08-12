@@ -58,12 +58,16 @@ namespace cbdc::locking_shard {
         params.heart_beat_interval_ = static_cast<int>(m_opts.m_heartbeat);
         params.snapshot_distance_ = 0; // TODO: implement snapshots
         params.max_append_size_ = static_cast<int>(m_opts.m_raft_max_batch);
+        // Benedict
+        // [C1]
+        // Passing extra values from cbdc to NuRaft
         params.node_id  = static_cast<int>(m_node_id);
         params.cluster_id = static_cast<int>(m_shard_id);
         params.verbose = m_opts.m_verbose;
         params.is_byzantine = m_opts.m_byzantine;  
         params.machine_type = "shard";
         params.peer_size    = static_cast<size_t>(m_opts.m_size); 
+        // [C1] end
         if(!m_raft_serv->init(params)) {
             m_logger->error("Failed to initialize raft server");
             return false;

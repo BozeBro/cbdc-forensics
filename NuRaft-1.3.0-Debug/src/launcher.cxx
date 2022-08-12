@@ -49,11 +49,19 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
                                 rpc_cli_factory,
                                 scheduler,
                                 params_given );
-    
+    // Benedict 
+    // [C1]
+    // Receiving parameters from cbdc
     bool is_verbose = params_given.verbose; 
     std::string byz_type = params_given.is_byzantine;
+    // [C1] end
+    // Benedict
+    // [C2], [C3]
+    // Initializing Byzantine node or log server
+    // Change log_server to raft_server to have default behavior
     if (byz_type == "vm") raft_instance_ = cs_new<byz_server>(ctx, opt); 
     else raft_instance_ = cs_new<log_server>(ctx, opt); 
+    // [C2, C3]
     asio_listener_->listen( raft_instance_ );
     return raft_instance_;
 }

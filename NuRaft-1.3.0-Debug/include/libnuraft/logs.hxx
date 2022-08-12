@@ -3,7 +3,9 @@
 
 #include "raft_server.hxx"
 #include <vector>
-
+// [C3]
+// Benedict
+// Log wrapper impl.
 namespace nuraft {
     enum activity {
         null_state     = -1,

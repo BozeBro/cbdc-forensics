@@ -2,6 +2,9 @@
 #include "req_msg.hxx"
 #include <vector>
 #include <iostream>
+// [C3]
+// Benedict
+// log wrapper impl code
 namespace nuraft{
     void log_server::set_state(activity act, req_msg& req) {
         int32 src{req.get_src()};

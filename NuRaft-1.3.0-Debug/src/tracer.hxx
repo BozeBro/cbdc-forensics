@@ -53,6 +53,10 @@ static inline std::string msg_if_given
 #define L_FATAL (1)
 
 /*
+Benedict
+[C3]
+Didn't implement flag to remove macros. We have to do manually currently
+Remove these functions to remove hard to read nuraft messages
 // Uncomment to put back regular behavior
 #define p_lv(lv, ...) \
     if (l_ && l_->get_level() >= (lv)) \
@@ -93,7 +97,7 @@ static inline std::string msg_if_given
     if (l_ && l_->get_level() >= 1) \
         l_->put_details(1, __FILE__, __func__, __LINE__, msg_if_given(__VA_ARGS__))
 */
-
+// Use below so we do not have to comment all macro usage
 // replace above codde with this code and use logger
 #define p_lv(...) void(0)
 #define p_tr(...) void(0)

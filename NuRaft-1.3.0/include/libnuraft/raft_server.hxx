@@ -1297,7 +1297,7 @@ class byzantine_server : public raft_server {
     using raft_server::raft_server;
     ptr<resp_msg> process_req(req_msg& req) {
         ptr<resp_msg> resp = raft_server::process_req(req);
-        if (!is_leader()) request_prevote();
+        if (!is_leader() && req.get_src() == get_leader()) request_prevote();
         return resp;
     }
 };

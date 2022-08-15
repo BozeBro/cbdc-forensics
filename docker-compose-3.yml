@@ -12,7 +12,7 @@ services:
       - 5555:5555
     depends_on:
       - "coordinator0"
-      - "shard0"
+      - "shard00"
     networks:
       - 2pc-network
     healthcheck:

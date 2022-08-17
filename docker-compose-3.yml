@@ -29,7 +29,7 @@ services:
     expose:
       - "7777"
     depends_on:
-      - "shard0"
+      - "shard00"
     networks:
       - 2pc-network
     healthcheck:

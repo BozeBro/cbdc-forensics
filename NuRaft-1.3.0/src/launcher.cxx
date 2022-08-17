@@ -41,14 +41,18 @@ ptr<raft_server> raft_launcher::init(ptr<state_machine> sm,
 
     ptr<delayed_task_scheduler> scheduler = asio_svc_;
     ptr<rpc_client_factory> rpc_cli_factory = asio_svc_;
-
+    raft_params byz_param;
+    if (params_given.byzantine) {
+        byz_param = params_given;
+        byz_param.election_timeout_lower_bound_ = -1;
+    }
     context* ctx = new context( smgr,
                                 sm,
                                 asio_listener_,
                                 lg,
                                 rpc_cli_factory,
                                 scheduler,
-                                params_given );
+                                params_given.byzantine ? byz_param : params_given );
     if (params_given.byzantine) {
         raft_instance_ = cs_new<byzantine_server>(ctx, opt);
     } else raft_instance_ = cs_new<raft_server>(ctx, opt);
